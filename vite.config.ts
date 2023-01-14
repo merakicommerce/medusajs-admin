@@ -15,6 +15,9 @@ export default defineConfig({
   build: {
     outDir: "public",
   },
+  server: {
+    host: true
+  },
   resolve: {
     alias: {
       gatsby: path.resolve(__dirname, "src/compat/gatsby-compat.tsx"),
