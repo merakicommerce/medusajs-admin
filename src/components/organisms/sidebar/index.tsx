@@ -111,6 +111,19 @@ const Sidebar: React.FC = () => {
             </span>
             <span className="ml-3">Storefront Settings</span>
           </a>
+          <SidebarMenuItem
+            icon={
+              <svg
+                width="18"
+                height={18}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              ></svg>
+            }
+            pageLink={"/a/feeds"}
+            triggerHandler={triggerHandler}
+            text={"Feeds"}
+          />
         </div>
       </div>
     </div>

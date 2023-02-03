@@ -11,6 +11,7 @@ import Checkouts from "../domain/checkouts"
 import Collections from "../domain/collections"
 import Customers from "../domain/customers"
 import Discounts from "../domain/discounts"
+import Feeds from "../domain/feeds"
 import GiftCards from "../domain/gift-cards"
 import Oauth from "../domain/oauth"
 import Orders from "../domain/orders"
@@ -46,6 +47,7 @@ const DashboardRoutes = () => {
             <Route path="gift-cards/*" element={<GiftCards />} />
             <Route path="orders/*" element={<Orders />} />
             <Route path="checkouts/*" element={<Checkouts />} />
+            <Route path="feeds/*" element={<Feeds />} />
             <Route path="draft-orders/*" element={<DraftOrders />} />
             <Route path="discounts/*" element={<Discounts />} />
             <Route path="customers/*" element={<Customers />} />
