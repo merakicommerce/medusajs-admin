@@ -15,9 +15,7 @@ type SidebarMenuItemProps = {
   subItems?: SidebarMenuSubitemProps[]
 }
 
-const SidebarMenuItem: React.FC<SidebarMenuItemProps> & {
-  SubItem: (props: SidebarMenuSubitemProps) => JSX.Element
-} = ({
+const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   pageLink,
   icon,
   text,
@@ -25,8 +23,8 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> & {
   subItems = [],
 }: SidebarMenuItemProps) => {
   const styles =
-    "group py-1.5 my-0.5 rounded-rounded flex text-grey-50 hover:bg-grey-10 items-center px-2"
-  const activeStyles = "bg-grey-10 is-active"
+    "py-1.5 px-3 my-0.5 rounded-base flex text-grey-90 hover:bg-grey-10 items-center"
+  const activeStyles = "bg-grey-10 text-violet-50"
   const classNameFn = useCallback(
     ({ isActive }) => (isActive ? `${styles} ${activeStyles}` : styles),
     []
@@ -37,16 +35,17 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> & {
       transitionTime={150}
       transitionCloseTime={150}
       {...triggerHandler()}
+      open
       trigger={
         <NavLink className={classNameFn} to={pageLink}>
           <span className="items-start">{icon}</span>
-          <span className="ml-3 group-[.is-active]:text-grey-90">{text}</span>
+          <span className="ml-3">{text}</span>
         </NavLink>
       }
     >
       {subItems?.length > 0 &&
-        subItems.map(({ pageLink, text }) => (
-          <SubItem pageLink={pageLink} text={text} />
+        subItems.map(({ pageLink, text }, i) => (
+          <SubItem key={i} pageLink={pageLink} text={text} />
         ))}
     </Collapsible>
   )
@@ -62,7 +61,7 @@ const SubItem = ({ pageLink, text }: SidebarMenuSubitemProps) => {
 
   return (
     <NavLink className={classNameFn} to={pageLink}>
-      <span className="ml-3 text-grey-90 text-small">{text}</span>
+      <span className="ml-9 text-grey-90 text-small">{text}</span>
     </NavLink>
   )
 }
