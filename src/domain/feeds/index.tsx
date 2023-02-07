@@ -111,7 +111,7 @@ const Index = () => {
                 target={"_blank"}
                 href={`https://medusa.designereditions.com/api/feed?secret=all&lang=en&currencyCode=${r.currency_code}&reg=${r.id}`}
               >
-                English - {r.currency_code}
+                English - {r.countries[0].display_name} - {r.currency_code}
               </a>
             </Button>
           </>
