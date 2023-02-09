@@ -56,13 +56,11 @@ const ReturnMenu: React.FC<ReturnMenuProps> = ({ order, onDismiss }) => {
     }
   }, [order])
 
-  const {
-    isLoading: shippingLoading,
-    shipping_options: shippingOptions,
-  } = useAdminShippingOptions({
-    region_id: order.region_id,
-    is_return: true,
-  })
+  const { isLoading: shippingLoading, shipping_options: shippingOptions } =
+    useAdminShippingOptions({
+      region_id: order.region_id,
+      is_return: true,
+    })
 
   useEffect(() => {
     const items = Object.keys(toReturn)

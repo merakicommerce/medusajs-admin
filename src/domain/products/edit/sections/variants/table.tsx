@@ -4,6 +4,7 @@ import { Column, useTable } from "react-table"
 import DuplicateIcon from "../../../../../components/fundamentals/icons/duplicate-icon"
 import EditIcon from "../../../../../components/fundamentals/icons/edit-icon"
 import TrashIcon from "../../../../../components/fundamentals/icons/trash-icon"
+import UploadIcon from "../../../../../components/fundamentals/icons/upload-icon"
 import Actionables from "../../../../../components/molecules/actionables"
 import Table from "../../../../../components/molecules/table"
 
@@ -13,6 +14,7 @@ type Props = {
     deleteVariant: (variantId: string) => void
     duplicateVariant: (variant: ProductVariant) => void
     updateVariant: (variant: ProductVariant) => void
+    updateImagesVariant: (variant: ProductVariant) => void
   }
 }
 
@@ -88,7 +90,12 @@ const VariantsTable = ({ variants, actions }: Props) => {
       },
     })
 
-  const { deleteVariant, updateVariant, duplicateVariant } = actions
+  const {
+    deleteVariant,
+    updateImagesVariant,
+    updateVariant,
+    duplicateVariant,
+  } = actions
 
   return (
     <Table {...getTableProps()} className="table-fixed">
@@ -124,6 +131,11 @@ const VariantsTable = ({ variants, actions }: Props) => {
                         label: "Edit Variant",
                         icon: <EditIcon size="20" />,
                         onClick: () => updateVariant(row.original),
+                      },
+                      {
+                        label: "Update Images",
+                        onClick: () => updateImagesVariant(row.original),
+                        icon: <UploadIcon size="20" />,
                       },
                       {
                         label: "Duplicate Variant",
