@@ -40,10 +40,10 @@ export default defineConfig({
   server: {
     host: true,
     proxy: {
-      '/api': {
-        target: 'https://medusa-backend.designereditions.com',
+      "/api": {
+        target: "https://medusa-backend.designereditions.com",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },

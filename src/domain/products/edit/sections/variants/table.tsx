@@ -15,6 +15,7 @@ type Props = {
     duplicateVariant: (variant: ProductVariant) => void
     updateVariant: (variant: ProductVariant) => void
     updateImagesVariant: (variant: ProductVariant) => void
+    updateMetadataVariant: (variant: ProductVariant) => void
   }
 }
 
@@ -95,6 +96,7 @@ const VariantsTable = ({ variants, actions }: Props) => {
     updateImagesVariant,
     updateVariant,
     duplicateVariant,
+    updateMetadataVariant,
   } = actions
 
   return (
@@ -131,6 +133,11 @@ const VariantsTable = ({ variants, actions }: Props) => {
                         label: "Edit Variant",
                         icon: <EditIcon size="20" />,
                         onClick: () => updateVariant(row.original),
+                      },
+                      {
+                        label: "Update Metadata",
+                        onClick: () => updateMetadataVariant(row.original),
+                        icon: <EditIcon size="20" />,
                       },
                       {
                         label: "Update Images",
