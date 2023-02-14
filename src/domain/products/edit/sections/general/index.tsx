@@ -12,6 +12,7 @@ import Section from "../../../../../components/organisms/section"
 import { useFeatureFlag } from "../../../../../context/feature-flag"
 import useToggleState from "../../../../../hooks/use-toggle-state"
 import useEditProductActions from "../../hooks/use-edit-product-actions"
+import EditIMetadataProductModal from "../metadata/metadata-modal"
 import ChannelsModal from "./channels-modal"
 import GeneralModal from "./general-modal"
 
@@ -26,7 +27,11 @@ const GeneralSection = ({ product }: Props) => {
     close: closeInfo,
     toggle: toggleInfo,
   } = useToggleState()
-
+  const {
+    state: infoMetadataState,
+    close: closeInfoMetadata,
+    toggle: toggleInfoMetadata,
+  } = useToggleState()
   const {
     state: channelsState,
     close: closeChannels,
@@ -42,20 +47,22 @@ const GeneralSection = ({ product }: Props) => {
       icon: <EditIcon size={20} />,
     },
     {
+      label: "Edit Metadata",
+      onClick: toggleInfoMetadata,
+      icon: <EditIcon size={20} />,
+    },
+    isFeatureEnabled("sales_channels") && {
+      label: "Edit Sales Channels",
+      onClick: toggleChannels,
+      icon: <ChannelsIcon size={20} />,
+    },
+    {
       label: "Delete",
       onClick: onDelete,
       variant: "danger",
       icon: <TrashIcon size={20} />,
     },
-  ]
-
-  if (isFeatureEnabled("sales_channels")) {
-    actions.splice(1, 0, {
-      label: "Edit Sales Channels",
-      onClick: toggleChannels,
-      icon: <ChannelsIcon size={20} />,
-    })
-  }
+  ].filter(Boolean)
 
   return (
     <>
@@ -81,7 +88,13 @@ const GeneralSection = ({ product }: Props) => {
       </Section>
 
       <GeneralModal product={product} open={infoState} onClose={closeInfo} />
-
+      {infoMetadataState && (
+        <EditIMetadataProductModal
+          product={product}
+          open={infoMetadataState}
+          onClose={closeInfoMetadata}
+        />
+      )}
       <FeatureToggle featureFlag="sales_channels">
         <ChannelsModal
           product={product}
