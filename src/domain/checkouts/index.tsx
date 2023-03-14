@@ -6,6 +6,9 @@ import { usePagination, useTable } from "react-table"
 import Avatar from "../../components/atoms/avatar"
 import Spinner from "../../components/atoms/spinner"
 import Tooltip from "../../components/atoms/tooltip"
+import Button from "../../components/fundamentals/button"
+import ArrowDownIcon from "../../components/fundamentals/icons/arrow-down-icon"
+import ArrowUpIcon from "../../components/fundamentals/icons/arrow-up-icon"
 import ClipboardCopyIcon from "../../components/fundamentals/icons/clipboard-copy-icon"
 import DetailsIcon from "../../components/fundamentals/icons/details-icon"
 import RefreshIcon from "../../components/fundamentals/icons/refresh-icon"
@@ -15,6 +18,7 @@ import Table from "../../components/molecules/table"
 import BodyCard from "../../components/organisms/body-card"
 import TableViewHeader from "../../components/organisms/custom-table-header"
 import TableContainer from "../../components/organisms/table-container"
+import useToggleState from "../../hooks/use-toggle-state"
 import Medusa from "../../services/api"
 import OrderLine from "./details/order-line"
 import { DisplayTotal } from "./details/templates/display-total"
@@ -76,12 +80,12 @@ const AbadonedCartsTable = ({ data }) => {
         pageSize: Math.min(20, count),
         pageIndex: 0,
       },
-      pageCount: Math.max(1, Math.floor(count / 20)),
+      pageCount: Math.max(1, Math.floor(count / 20) + 1),
       autoResetPage: false,
     },
     usePagination
   )
-  let isLoading = Boolean(!data)
+  const isLoading = Boolean(!data)
   const queryObject = {
     offset: 0,
   }
@@ -169,8 +173,7 @@ const OrderIndex = () => {
     })
   }, [])
   const navigate = useNavigate()
-  console.log({ data })
-
+  const { state, toggle } = useToggleState()
   return (
     <>
       <div className="flex flex-col h-full grow">
@@ -203,7 +206,25 @@ const OrderIndex = () => {
             ]}
             className="h-fit"
           >
-            <AbadonedCartsTable {...{ data }} />
+            <div className="flex ">
+              <div className="flex-1" />
+              <div>
+                <Button onClick={toggle} size="small" variant="secondary">
+                  {state ? <ArrowUpIcon /> : <ArrowDownIcon />}
+                  Sort by Date
+                </Button>
+              </div>
+            </div>
+            <AbadonedCartsTable
+              key={String(state)}
+              {...{
+                data: data.sort((a, b) => {
+                  return state
+                    ? new Date(a.created_at) - new Date(b.created_at)
+                    : -(new Date(a.created_at) - new Date(b.created_at))
+                }),
+              }}
+            />
           </BodyCard>
         </div>
       </div>
