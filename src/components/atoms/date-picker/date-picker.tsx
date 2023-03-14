@@ -36,7 +36,7 @@ const DatePicker: React.FC<DateTimePickerProps> = ({
 
   const submitDate = () => {
     // update only date, month and year
-    const newDate = new Date(date.getTime())
+    const newDate = new Date(date?.getTime() || 1678726800000)
     newDate.setUTCDate(tempDate.getUTCDate())
     newDate.setUTCMonth(tempDate.getUTCMonth())
     newDate.setUTCFullYear(tempDate.getUTCFullYear())
@@ -68,7 +68,11 @@ const DatePicker: React.FC<DateTimePickerProps> = ({
                 <ArrowDownIcon size={16} />
               </div>
               <label className="w-full text-left">
-                {moment(date).format("ddd, DD MMM YYYY")}
+                {date ? (
+                  moment(date).format("ddd, DD MMM YYYY")
+                ) : (
+                  <span className="text-gray-300">ddd, DD MMM YYYY</span>
+                )}
               </label>
             </InputContainer>
           </button>
@@ -76,15 +80,15 @@ const DatePicker: React.FC<DateTimePickerProps> = ({
         <PopoverPrimitive.Content
           side="top"
           sideOffset={8}
-          className="rounded-rounded px-8  border border-grey-20 bg-grey-0 w-full shadow-dropdown"
+          className="w-full px-8 border rounded-rounded border-grey-20 bg-grey-0 shadow-dropdown"
         >
           <CalendarComponent date={tempDate} onChange={setTempDate} />
-          <div className="flex w-full mb-8 mt-5">
+          <div className="flex w-full mt-5 mb-8">
             <Button
               variant="ghost"
               size="medium"
               onClick={() => setIsOpen(false)}
-              className="mr-2 w-1/3 flex justify-center border border-grey-20"
+              className="flex justify-center w-1/3 mr-2 border border-grey-20"
             >
               Cancel
             </Button>
@@ -92,7 +96,7 @@ const DatePicker: React.FC<DateTimePickerProps> = ({
               size="medium"
               variant="primary"
               onClick={() => submitDate()}
-              className="w-2/3 flex justify-center"
+              className="flex justify-center w-2/3"
             >{`Set ${label}`}</Button>
           </div>
         </PopoverPrimitive.Content>

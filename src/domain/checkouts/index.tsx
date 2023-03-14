@@ -4,6 +4,7 @@ import { useLayoutEffect, useMemo, useState } from "react"
 import { Route, Routes, useNavigate, useParams } from "react-router-dom"
 import { usePagination, useTable } from "react-table"
 import Avatar from "../../components/atoms/avatar"
+import DatePicker from "../../components/atoms/date-picker/date-picker"
 import Spinner from "../../components/atoms/spinner"
 import Tooltip from "../../components/atoms/tooltip"
 import Button from "../../components/fundamentals/button"
@@ -174,6 +175,9 @@ const OrderIndex = () => {
   }, [])
   const navigate = useNavigate()
   const { state, toggle } = useToggleState()
+  const [startDate, setStartDate] = useState()
+  const [endDate, setEndDate] = useState()
+  const compareEndDate = moment(endDate).add("days", 1)
   return (
     <>
       <div className="flex flex-col h-full grow">
@@ -206,9 +210,35 @@ const OrderIndex = () => {
             ]}
             className="h-fit"
           >
-            <div className="flex ">
-              <div className="flex-1" />
-              <div>
+            <div className="z-10 flex items-end">
+              <div className="flex justify-start flex-1 gap-3">
+                <div className="max-w-xs">
+                  <DatePicker
+                    date={startDate}
+                    label="Start date"
+                    onSubmitDate={setStartDate}
+                  />
+                </div>
+                <div className="max-w-xs">
+                  <DatePicker
+                    date={endDate}
+                    label="End date"
+                    onSubmitDate={setEndDate}
+                  />
+                </div>
+                <div className="flex-1" />
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => {
+                    setStartDate(null)
+                    setEndDate(null)
+                  }}
+                  size="small"
+                  variant="secondary"
+                >
+                  Clear filters
+                </Button>
                 <Button onClick={toggle} size="small" variant="secondary">
                   {state ? <ArrowUpIcon /> : <ArrowDownIcon />}
                   Sort by Date
@@ -218,11 +248,19 @@ const OrderIndex = () => {
             <AbadonedCartsTable
               key={String(state)}
               {...{
-                data: data.sort((a, b) => {
-                  return state
-                    ? new Date(a.created_at) - new Date(b.created_at)
-                    : -(new Date(a.created_at) - new Date(b.created_at))
-                }),
+                data: data
+                  .sort((a, b) => {
+                    return state
+                      ? new Date(a.created_at) - new Date(b.created_at)
+                      : -(new Date(a.created_at) - new Date(b.created_at))
+                  })
+                  .filter((item) => {
+                    if (!startDate || !endDate) return true
+                    return (
+                      new Date(item.created_at) > new Date(startDate) &&
+                      new Date(item.created_at) < new Date(compareEndDate)
+                    )
+                  }),
               }}
             />
           </BodyCard>
