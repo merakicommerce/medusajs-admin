@@ -166,7 +166,7 @@ const AbadonedCartsTable = ({ data }) => {
 const filter = (item) => Boolean(item.email)
 const OrderIndex = () => {
   const view = "Abandoned Checkouts"
-  const [data, setData] = useState(cachedata)
+  const [data = [], setData] = useState(cachedata)
   useLayoutEffect(() => {
     Medusa.abadonedCarts.list().then((res) => {
       cachedata = res.data.filter(filter)
@@ -248,7 +248,7 @@ const OrderIndex = () => {
             <AbadonedCartsTable
               key={String(state)}
               {...{
-                data: data
+                data: (data || [])
                   .sort((a, b) => {
                     return state
                       ? new Date(a.created_at) - new Date(b.created_at)
