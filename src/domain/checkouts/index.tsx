@@ -291,7 +291,7 @@ const DetailsModal = ({ handleCancel }) => {
     result = result + item.quantity * item.unit_price
     return result
   }, 0)
-  let currencyCode = "GBP"
+  let currencyCode =data?.cart?.currency_code "GBP"
   const customerActionables: ActionType[] = [
     {
       label: "Go to Customer",
