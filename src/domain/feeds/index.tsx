@@ -6,6 +6,7 @@ import { Route, Routes } from "react-router-dom"
 import PageDescription from "../../components/atoms/page-description"
 import Button from "../../components/fundamentals/button"
 import MapPinIcon from "../../components/fundamentals/icons/map-pin-icon"
+import { feedUrl } from "../../services/config"
 const SettingsOverview: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <div>
@@ -73,7 +74,7 @@ const Index = () => {
             <Button size="small" variant="secondary">
               <a
                 target={"_blank"}
-                href={`https://medusa.designereditions.com/api/feed?secret=all&lang=en&currencyCode=${r.currency_code}&reg=${r.id}`}
+                href={`${feedUrl}?secret=all&lang=en&currencyCode=${r.currency_code}&reg=${r.id}`}
               >
                 English - {r.name}
               </a>
@@ -87,7 +88,7 @@ const Index = () => {
             <Button size="small" variant="secondary">
               <a
                 target={"_blank"}
-                href={`https://medusa.designereditions.com/api/feed?secret=all&reg=${r.id}`}
+                href={`${feedUrl}?secret=all&reg=${r.id}`}
               >
                 {r.name}
               </a>
@@ -101,7 +102,7 @@ const Index = () => {
             <Button size="small" variant="secondary">
               <a
                 target={"_blank"}
-                href={`https://medusa.designereditions.com/api/feed?secret=all&reg=${r.id}`}
+                href={`${feedUrl}?secret=all&reg=${r.id}`}
               >
                 {r.name}
               </a>
@@ -109,7 +110,7 @@ const Index = () => {
             <Button size="small" variant="secondary">
               <a
                 target={"_blank"}
-                href={`https://medusa.designereditions.com/api/feed?secret=all&lang=en&currencyCode=${r.currency_code}&reg=${r.id}`}
+                href={`${feedUrl}?secret=all&lang=en&currencyCode=${r.currency_code}&reg=${r.id}`}
               >
                 English - {r.countries[0].display_name} - {r.currency_code}
               </a>

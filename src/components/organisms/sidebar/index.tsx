@@ -9,6 +9,7 @@ import TagIcon from "../../fundamentals/icons/tag-icon"
 import UsersIcon from "../../fundamentals/icons/users-icon"
 import SidebarMenuItem from "../../molecules/sidebar-menu-item"
 import UserMenu from "../../molecules/user-menu"
+import { frontAdminUrl } from "../../../services/config"
 
 const ICON_SIZE = 18
 
@@ -97,8 +98,7 @@ const Sidebar: React.FC = () => {
           <a
             target={"_blank"}
             className="py-1.5 px-3 my-0.5 rounded-base flex text-grey-90 hover:bg-grey-10 items-center"
-            href="https://medusa.designereditions.com/admin/index.html#/~"
-          >
+            href={frontAdminUrl}>
             <span className="items-start">
               <svg
                 width="18"
