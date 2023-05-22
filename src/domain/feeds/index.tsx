@@ -72,7 +72,10 @@ const Index = () => {
         result = (
           <>
             <Button size="small" variant="secondary">
-              <a target={"_blank"} href={`${feedUrl}/${r.id}`}>
+              <a
+                target={"_blank"}
+                href={`${feedUrl}?secret=all&lang=en&currencyCode=${r.currency_code}&reg=${r.id}`}
+              >
                 English - {r.name}
               </a>
             </Button>
@@ -83,7 +86,7 @@ const Index = () => {
         result = (
           <>
             <Button size="small" variant="secondary">
-              <a target={"_blank"} href={`${feedUrl}/${r.id}`}>
+              <a target={"_blank"} href={`${feedUrl}?secret=all&reg=${r.id}`}>
                 {r.name}
               </a>
             </Button>
@@ -94,12 +97,15 @@ const Index = () => {
         result = (
           <>
             <Button size="small" variant="secondary">
-              <a target={"_blank"} href={`${feedUrl}/${r.id}`}>
+              <a target={"_blank"} href={`${feedUrl}?secret=all&reg=${r.id}`}>
                 {r.name}
               </a>
             </Button>
             <Button size="small" variant="secondary">
-              <a target={"_blank"} href={`${feedUrl}/${r.id}`}>
+              <a
+                target={"_blank"}
+                href={`${feedUrl}?secret=all&lang=en&currencyCode=${r.currency_code}&reg=${r.id}`}
+              >
                 English - {r.countries[0].display_name} - {r.currency_code}
               </a>
             </Button>
