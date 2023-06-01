@@ -22,7 +22,9 @@ type MarkShippedModalProps = {
 
 type MarkShippedFormData = {
   tracking_numbers: {
-    value: string | undefined
+    courier_name: string
+    tracking_number: string
+    tracking_url: string
   }[]
 }
 
@@ -33,7 +35,9 @@ const MarkShippedModal: React.FC<MarkShippedModalProps> = ({
 }) => {
   const { control, watch, handleSubmit } = useForm<MarkShippedFormData>({
     defaultValues: {
-      tracking_numbers: [{ value: "" }],
+      tracking_numbers: [
+        { courier_name: "", tracking_number: "", tracking_url: "" },
+      ],
     },
     shouldUnregister: true,
   })
@@ -72,7 +76,10 @@ const MarkShippedModal: React.FC<MarkShippedModalProps> = ({
       fulfillment.claim_order_id || fulfillment.swap_id || fulfillment.order_id
     const [type] = resourceId.split("_")
 
-    const tracking_numbers = data.tracking_numbers.map((tn) => tn.value)
+    const tracking_numbers = data.tracking_numbers.map(
+      (tn) =>
+        `${tn.courier_name} tracking number: ${tn.tracking_number}  at ${tn.tracking_url}`
+    )
 
     type actionType =
       | typeof markOrderShipped
@@ -141,35 +148,102 @@ const MarkShippedModal: React.FC<MarkShippedModalProps> = ({
               <span className="inter-base-semibold mb-2">Tracking</span>
               <div className="flex flex-col space-y-2">
                 {trackingNumbers.map((tn, index) => (
-                  <Controller
+                  <div
                     key={tn.id}
-                    name={`tracking_numbers.${index}.value`}
-                    control={control}
-                    rules={{
-                      shouldUnregister: true,
-                    }}
-                    render={({ field }) => {
-                      return (
-                        <Input
-                          deletable={index !== 0}
-                          label={index === 0 ? "Tracking number" : ""}
-                          type="text"
-                          placeholder={"Tracking number..."}
-                          {...field}
-                          onDelete={() => removeTracking(index)}
-                        />
-                      )
-                    }}
-                  />
+                    className="border-t gap-3 flex flex-col border-grey-20 first:border-t-0 py-6"
+                  >
+                    <Controller
+                      key={tn.id}
+                      name={`tracking_numbers.${index}.courier_name`}
+                      control={control}
+                      rules={{
+                        shouldUnregister: true,
+                      }}
+                      render={({ field }) => {
+                        return (
+                          <div className="flex flex-col gap-3">
+                            <Input
+                              deletable={index !== 0}
+                              label={"Courier name"}
+                              type="text"
+                              placeholder={"Courier name..."}
+                              {...field}
+                              onDelete={() => field.onChange("")}
+                            />
+                          </div>
+                        )
+                      }}
+                    />
+                    <Controller
+                      key={tn.id}
+                      name={`tracking_numbers.${index}.tracking_number`}
+                      control={control}
+                      rules={{
+                        shouldUnregister: true,
+                      }}
+                      render={({ field }) => {
+                        return (
+                          <div className="flex flex-col gap-3">
+                            <Input
+                              deletable={index !== 0}
+                              label={"Tracking number"}
+                              type="text"
+                              placeholder={"Tracking number..."}
+                              {...field}
+                              onDelete={() => field.onChange("")}
+                            />
+                          </div>
+                        )
+                      }}
+                    />
+                    <Controller
+                      key={tn.id}
+                      name={`tracking_numbers.${index}.tracking_url`}
+                      control={control}
+                      rules={{
+                        shouldUnregister: true,
+                      }}
+                      render={({ field }) => {
+                        return (
+                          <div className="flex flex-col gap-3">
+                            <Input
+                              deletable={index !== 0}
+                              label={"Tracking Url"}
+                              type="text"
+                              placeholder={"Tracking Url..."}
+                              {...field}
+                              onDelete={() => field.onChange("")}
+                            />
+                          </div>
+                        )
+                      }}
+                    />
+                    <Button
+                      className="inline-flex self-end"
+                      size="small"
+                      onClick={() => removeTracking(index)}
+                      variant="danger"
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 ))}
               </div>
             </div>
             <div className="flex w-full justify-end mt-4">
               <Button
                 size="small"
-                onClick={() => appendTracking({ value: undefined })}
+                onClick={() =>
+                  appendTracking({
+                    courier_name: "",
+                    tracking_number: "",
+                    tracking_url: "",
+                  })
+                }
                 variant="secondary"
-                disabled={trackingNumbers.some((tn) => !tn.value)}
+                disabled={trackingNumbers.some(
+                  (tn) => !Object.values(tn).filter(Boolean).length
+                )}
               >
                 + Add Additional Tracking Number
               </Button>
