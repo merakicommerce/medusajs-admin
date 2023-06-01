@@ -78,7 +78,7 @@ const MarkShippedModal: React.FC<MarkShippedModalProps> = ({
 
     const tracking_numbers = data.tracking_numbers.map(
       (tn) =>
-        `${tn.courier_name} tracking number: ${tn.tracking_number}  at <a href="${tn.tracking_url}"/>${tn.tracking_url}</a>`
+        `${tn.courier_name} tracking number: ${tn.tracking_number}  at ${tn.tracking_url}`
     )
 
     type actionType =
