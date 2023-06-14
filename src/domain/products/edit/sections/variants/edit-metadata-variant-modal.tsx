@@ -105,6 +105,7 @@ export const getEditIMetadataVariantDefaultValues = (
     in_stock,
     leadtime,
     material,
+    dimension_image,
     heading_1,
     heading_2,
     description_image_1,
@@ -116,6 +117,7 @@ export const getEditIMetadataVariantDefaultValues = (
     material: string
     heading_1: string
     heading_2: string
+    dimension_image: string
     description_image_1: string
     description_image_2: string
   }
@@ -126,6 +128,7 @@ export const getEditIMetadataVariantDefaultValues = (
       leadtime,
       material,
       heading_1,
+      dimension_image,
       heading_2,
       description_image_1,
       description_image_2,

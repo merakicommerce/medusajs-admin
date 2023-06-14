@@ -8,6 +8,7 @@ interface Metadata {
   material: string
   heading_1: string
   heading_2: string
+  dimension_image: string
   description_image_1: string
   description_image_2: string
 }
@@ -20,6 +21,7 @@ let fields = [
   "heading_2",
   "description_image_1",
   "description_image_2",
+  "dimension_image"
 ]
 export type EditMetadataVariantFormType = {
   metadata: Metadata
