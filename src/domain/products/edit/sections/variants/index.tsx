@@ -8,6 +8,7 @@ import Section from "../../../../../components/organisms/section"
 import useToggleState from "../../../../../hooks/use-toggle-state"
 import useEditProductActions from "../../hooks/use-edit-product-actions"
 import AddVariantModal from "./add-variant-modal"
+import EditDimensionVariantModal from "./edit-demension-image-variant-modal"
 import EditImagesVariantModal from "./edit-images-variant-modal"
 import EditIMetadataVariantModal from "./edit-metadata-variant-modal"
 import EditVariantModal from "./edit-variant-modal"
@@ -25,6 +26,9 @@ const VariantsSection = ({ product }: Props) => {
     { base: ProductVariant; isDuplicate: boolean } | undefined
   >(undefined)
   const [variantToUpdateImages, setVariantToUpdateImages] = useState<
+    { base: ProductVariant } | undefined
+  >(undefined)
+  const [variantToUpdateDimension, setVariantToUpdateDimension] = useState<
     { base: ProductVariant } | undefined
   >(undefined)
   const [variantToUpdateMetadata, setVariantToUpdateMetadata] = useState<
@@ -84,6 +88,9 @@ const VariantsSection = ({ product }: Props) => {
   const handleUpdateImagesVariant = (variant: ProductVariant) => {
     setVariantToUpdateImages({ base: variant })
   }
+  const handleUpdateDimensionImageVariant = (variant: ProductVariant) => {
+    setVariantToUpdateDimension({ base: variant })
+  }
   const handleUpdateMetadataVariant = (variant: ProductVariant) => {
     setVariantToUpdateMetadata({ base: variant })
   }
@@ -105,6 +112,7 @@ const VariantsSection = ({ product }: Props) => {
               updateVariant: handleEditVariant,
               duplicateVariant: handleDuplicateVariant,
               updateImagesVariant: handleUpdateImagesVariant,
+              updateDimensionImageVariant: handleUpdateDimensionImageVariant,
               updateMetadataVariant: handleUpdateMetadataVariant,
             }}
           />
@@ -138,6 +146,13 @@ const VariantsSection = ({ product }: Props) => {
           variant={variantToUpdateImages.base}
           product={product}
           onClose={() => setVariantToUpdateImages(undefined)}
+        />
+      )}
+      {variantToUpdateDimension && (
+        <EditDimensionVariantModal
+          variant={variantToUpdateDimension.base}
+          product={product}
+          onClose={() => setVariantToUpdateDimension(undefined)}
         />
       )}
       {variantToUpdateMetadata && (
