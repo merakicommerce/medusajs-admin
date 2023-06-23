@@ -84,7 +84,7 @@ const EditDimensionImageVariantForm = ({ form }: Props) => {
           return (
             <MediaSection
               onAdd={({ url }) => {
-                console.log([...form.getValues("image"), url])
+                console.log({ url })
                 form.setValue("image", url)
               }}
               onRemove={({ url }) => {

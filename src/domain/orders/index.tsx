@@ -1,17 +1,15 @@
 import { useAdminCreateBatchJob } from "medusa-react"
-import React, { useContext, useMemo, useState } from "react"
+import { useContext, useMemo, useState } from "react"
 import { Route, Routes, useNavigate } from "react-router-dom"
 
-import Button from "../../components/fundamentals/button"
-import ExportIcon from "../../components/fundamentals/icons/export-icon"
 import BodyCard from "../../components/organisms/body-card"
 import TableViewHeader from "../../components/organisms/custom-table-header"
 import ExportModal from "../../components/organisms/export-modal"
 import OrderTable from "../../components/templates/order-table"
+import { PollingContext } from "../../context/polling"
 import useNotification from "../../hooks/use-notification"
 import useToggleState from "../../hooks/use-toggle-state"
 import { getErrorMessage } from "../../utils/error-messages"
-import { PollingContext } from "../../context/polling"
 import Details from "./details"
 import { transformFiltersAsExportContext } from "./utils"
 
@@ -36,14 +34,8 @@ const OrderIndex = () => {
 
   const actions = useMemo(() => {
     return [
-      <Button
-        variant="secondary"
-        size="small"
-        onClick={() => openExportModal()}
-      >
-        <ExportIcon size={20} />
-        Export Orders
-      </Button>,
+      <a href={import.meta.env.VITE_MEDUSA_BACKEND_URL + "/admin/export_orders"} target="_blank" className="btn btn-secondary btn-small"><span className="mr-xsmall last:mr-0"><svg width={20} height={20} viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 13V15.6667C17.5 16.0203 17.3361 16.3594 17.0444 16.6095C16.7527 16.8595 16.357 17 15.9444 17H5.05556C4.643 17 4.24733 16.8595 3.95561 16.6095C3.66389 16.3594 3.5 16.0203 3.5 15.6667V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M14.6673 6.92057L10.5007 2.75391L6.33398 6.92057" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M10.5 2.75391V12.7539" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span><span className="mr-xsmall last:mr-0">Export Orders</span></a>
+      ,
     ]
   }, [view])
 
