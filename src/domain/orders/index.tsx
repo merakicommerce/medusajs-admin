@@ -55,7 +55,12 @@ const OrderIndex = () => {
       console.log(csv)
       return csv
     }
-    let csv = jsonToCsc(data)
+    let csv = jsonToCsc(data.map(item => ({
+      "product title": item.title,
+      "unit price": item.unit_price,
+      "quantity": item.quantity,
+      "create_at": item.created_at
+    })))
     var hiddenElement = document.createElement('a');
     hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
     hiddenElement.target = '_blank';
