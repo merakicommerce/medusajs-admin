@@ -1,3 +1,4 @@
+import { LineItem, ProductVariant } from "@medusajs/medusa";
 import Medusa from "../services/api";
 import { FormImage } from "../types/shared";
 
@@ -30,4 +31,28 @@ export const prepareImages = async (images: FormImage[]) => {
   }
 
   return [...existingImages, ...uploadedImgs]
+}
+
+
+export const repalceImage = (src: string) => src.replace(
+  "res.cloudinary.com",
+  "imageproxy.mobelaris.com/api/images"
+)
+export const getVariantImage = (variant: ProductVariant) => {
+
+
+  if (variant.metadata?.images.length > 0) {
+    return variant.product.images[0]
+  }
+
+  return null
+}
+export const getOrderLineItemImage = (item: LineItem) => {
+  let variant = item.variant
+
+  if (variant?.metadata?.images.length > 0) {
+    return repalceImage(variant.metadata.images[0]).replace("/image/upload/e_trim/", `/image/upload/e_trim,w_100/`)
+  }
+
+  return item.thumbnail
 }

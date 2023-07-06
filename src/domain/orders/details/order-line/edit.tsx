@@ -1,26 +1,27 @@
-import React from "react"
 import { LineItem, OrderItemChange, ProductVariant } from "@medusajs/medusa"
+import clsx from "clsx"
 import {
   useAdminDeleteOrderEditItemChange,
   useAdminOrderEditAddLineItem,
   useAdminOrderEditDeleteLineItem,
   useAdminOrderEditUpdateLineItem,
 } from "medusa-react"
-import clsx from "clsx"
+import React from "react"
 
-import ImagePlaceholder from "../../../../components/fundamentals/image-placeholder"
-import { formatAmountWithSymbol } from "../../../../utils/prices"
-import PlusIcon from "../../../../components/fundamentals/icons/plus-icon"
-import MinusIcon from "../../../../components/fundamentals/icons/minus-icon"
-import Actionables from "../../../../components/molecules/actionables"
-import TrashIcon from "../../../../components/fundamentals/icons/trash-icon"
-import DuplicateIcon from "../../../../components/fundamentals/icons/duplicate-icon"
-import RefreshIcon from "../../../../components/fundamentals/icons/refresh-icon"
-import useNotification from "../../../../hooks/use-notification"
-import { LayeredModalContext } from "../../../../components/molecules/modal/layered-modal"
-import { AddProductVariant } from "../../edit/modal"
-import Tooltip from "../../../../components/atoms/tooltip"
 import CopyToClipboard from "../../../../components/atoms/copy-to-clipboard"
+import Tooltip from "../../../../components/atoms/tooltip"
+import DuplicateIcon from "../../../../components/fundamentals/icons/duplicate-icon"
+import MinusIcon from "../../../../components/fundamentals/icons/minus-icon"
+import PlusIcon from "../../../../components/fundamentals/icons/plus-icon"
+import RefreshIcon from "../../../../components/fundamentals/icons/refresh-icon"
+import TrashIcon from "../../../../components/fundamentals/icons/trash-icon"
+import ImagePlaceholder from "../../../../components/fundamentals/image-placeholder"
+import Actionables from "../../../../components/molecules/actionables"
+import { LayeredModalContext } from "../../../../components/molecules/modal/layered-modal"
+import useNotification from "../../../../hooks/use-notification"
+import { getOrderLineItemImage } from "../../../../utils/images"
+import { formatAmountWithSymbol } from "../../../../utils/prices"
+import { AddProductVariant } from "../../edit/modal"
 
 type OrderEditLineProps = {
   item: LineItem
@@ -160,7 +161,7 @@ const OrderEditLine = ({
       icon: <TrashIcon size="20" />,
     },
   ].filter(Boolean)
-
+  let thumb = getOrderLineItemImage(item)
   return (
     <Tooltip
       side="top"
@@ -170,8 +171,8 @@ const OrderEditLine = ({
       <div className="flex justify-between mb-1 h-[64px] py-2 mx-[-5px] px-[5px] hover:bg-grey-5 rounded-rounded">
         <div className="flex space-x-4 justify-center flex-grow-1">
           <div className="flex h-[48px] w-[36px] rounded-rounded overflow-hidden">
-            {item.thumbnail ? (
-              <img src={item.thumbnail} className="object-cover" />
+            {thumb ? (
+              <img src={thumb} className="object-contain" />
             ) : (
               <ImagePlaceholder />
             )}

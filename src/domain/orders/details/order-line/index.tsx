@@ -1,6 +1,6 @@
 import { LineItem } from "@medusajs/medusa"
-import React from "react"
 import ImagePlaceholder from "../../../../components/fundamentals/image-placeholder"
+import { getOrderLineItemImage } from "../../../../utils/images"
 import { formatAmountWithSymbol } from "../../../../utils/prices"
 
 type OrderLineProps = {
@@ -9,12 +9,14 @@ type OrderLineProps = {
 }
 
 const OrderLine = ({ item, currencyCode }: OrderLineProps) => {
+  console.log("item", item)
+  let thumb = getOrderLineItemImage(item)
   return (
     <div className="flex justify-between mb-1 h-[64px] py-2 mx-[-5px] px-[5px] hover:bg-grey-5 rounded-rounded">
       <div className="flex space-x-4 justify-center">
         <div className="flex h-[48px] w-[36px] rounded-rounded overflow-hidden">
-          {item.thumbnail ? (
-            <img src={item.thumbnail} className="object-cover" />
+          {thumb ? (
+            <img src={thumb} className="object-contain" />
           ) : (
             <ImagePlaceholder />
           )}
@@ -25,9 +27,8 @@ const OrderLine = ({ item, currencyCode }: OrderLineProps) => {
           </span>
           {item?.variant && (
             <span className="inter-small-regular text-grey-50 truncate">
-              {`${item.variant.title}${
-                item.variant.sku ? ` (${item.variant.sku})` : ""
-              }`}
+              {`${item.variant.title}${item.variant.sku ? ` (${item.variant.sku})` : ""
+                }`}
             </span>
           )}
         </div>
