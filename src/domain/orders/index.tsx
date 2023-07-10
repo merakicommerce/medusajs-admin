@@ -56,7 +56,6 @@ const OrderIndex = () => {
       return csv
     }
     let csv = jsonToCsc(data.map(item => {
-      console.log({ item })
       return ({
         "ID": item.order.display_id,
         "First Name": item.order?.address_order_shipping_address_idToaddress?.first_name,
