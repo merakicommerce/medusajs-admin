@@ -13,6 +13,7 @@ import useToggleState from "../../hooks/use-toggle-state"
 import { getErrorMessage } from "../../utils/error-messages"
 import { formatAmountWithSymbol } from "../../utils/prices"
 import Details from "./details"
+import data from './sample.json'
 import { transformFiltersAsExportContext } from "./utils"
 const VIEWS = ["orders", "drafts"]
 
@@ -33,15 +34,15 @@ const OrderIndex = () => {
     state: exportModalOpen,
   } = useToggleState(false)
   const handleDownloadOrdersCsv = async () => {
-    const url = "/api/admin/export_orders"
-    let data = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('token')
-      }
-    }).then(res => res.json())
-    console.log({ data })
+    // const url = "/api/admin/export_orders"
+    // let data = await fetch(url, {
+    //   method: 'GET',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': 'Bearer ' + localStorage.getItem('token')
+    //   }
+    // }).then(res => res.json())
+    // console.log({ data })
     function jsonToCsc(json) {
       var fields = Object.keys(json[0])
       var replacer = function (key, value) { return value === null ? '' : value }
@@ -56,7 +57,7 @@ const OrderIndex = () => {
       return csv
     }
     let csv = jsonToCsc(data.map(item => {
-      return ({
+      let res = ({
         "ID": item.order.display_id,
         "First Name": item.order?.address_order_shipping_address_idToaddress?.first_name,
         "Last Name": item.order?.address_order_shipping_address_idToaddress?.last_name,
@@ -87,9 +88,12 @@ const OrderIndex = () => {
         })
 
       })
+      console.log({ res })
+      return res
     }))
+    const t = new Blob([csv], { type: 'application/csv' });
     var hiddenElement = document.createElement('a');
-    hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+    hiddenElement.href = URL.createObjectURL(t)
     hiddenElement.target = '_blank';
     hiddenElement.download = 'orders.csv';
     hiddenElement.click();
