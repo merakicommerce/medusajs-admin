@@ -11,9 +11,9 @@ import { PollingContext } from "../../context/polling"
 import useNotification from "../../hooks/use-notification"
 import useToggleState from "../../hooks/use-toggle-state"
 import { getErrorMessage } from "../../utils/error-messages"
+import { formatAmountWithSymbol } from "../../utils/prices"
 import Details from "./details"
 import { transformFiltersAsExportContext } from "./utils"
-
 const VIEWS = ["orders", "drafts"]
 
 const OrderIndex = () => {
@@ -55,12 +55,32 @@ const OrderIndex = () => {
       console.log(csv)
       return csv
     }
-    let csv = jsonToCsc(data.map(item => ({
-      "product title": item.title,
-      "unit price": item.unit_price,
-      "quantity": item.quantity,
-      "create_at": item.created_at
-    })))
+    let csv = jsonToCsc(data.map(item => {
+      console.log({ item })
+      return ({
+        "ID": item.order.display_id,
+        "First Name": item.order?.address_order_shipping_address_idToaddress?.first_name,
+        "Last Name": item.order?.address_order_shipping_address_idToaddress?.last_name,
+        "Street": item.order?.address_order_shipping_address_idToaddress?.address_1 + ' ' + item.order?.address_order_shipping_address_idToaddress?.address_2,
+        "City": item.order?.address_order_shipping_address_idToaddress?.city,
+        "Country": item.order?.address_order_shipping_address_idToaddress?.country_code.toUpperCase(),
+        "Product Name": item.title,
+        "Manufacturer": "",
+        "Email": item.order.email,
+        "Telephone": item.order?.address_order_shipping_address_idToaddress?.phone,
+        "Postcode": item.order?.address_order_shipping_address_idToaddress?.postal_code,
+        "SKU": item?.product_variant?.sku,
+        "Comment": item?.note?.value || '',
+        "Row Total": formatAmountWithSymbol({
+          amount: item.unit_price * item.quantity,
+          currency: item.order.currency_code,
+          tax: 0
+        }),
+        "Qty": item.quantity,
+        "Created At": item.order.created_at
+
+      })
+    }))
     var hiddenElement = document.createElement('a');
     hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
     hiddenElement.target = '_blank';
