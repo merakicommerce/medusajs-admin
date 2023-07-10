@@ -76,7 +76,15 @@ const OrderIndex = () => {
           tax: 0
         }),
         "Qty": item.quantity,
-        "Created At": item.order.created_at
+        "Created At": (new Date(item.order.created_at)).toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+          hour12: true
+        })
 
       })
     }))
