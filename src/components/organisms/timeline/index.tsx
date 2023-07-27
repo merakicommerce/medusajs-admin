@@ -80,7 +80,7 @@ const Timeline: React.FC<TimelineProps> = ({ orderId }) => {
             'Authorization': 'Bearer ' + localStorage.getItem('token')
           }
         }).then(res => res.json())
-        if (data?.status === "success") {
+        if (data?.status === "ok") {
           notification("Success", "Order confirmation email sent", "success")
         } else {
           notification("Error", "There is problem when sending order confirmation email", "error")
