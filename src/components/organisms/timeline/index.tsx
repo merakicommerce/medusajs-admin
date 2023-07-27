@@ -24,7 +24,6 @@ import {
   useBuildTimeline,
 } from "../../../hooks/use-build-timeline"
 import useNotification from "../../../hooks/use-notification"
-import { VITE_MEDUSA_BACKEND_URL } from "../../../services/config"
 import { getErrorMessage } from "../../../utils/error-messages"
 import Spinner from "../../atoms/spinner"
 import AlertIcon from "../../fundamentals/icons/alert-icon"
@@ -73,7 +72,7 @@ const Timeline: React.FC<TimelineProps> = ({ orderId }) => {
       icon: <SendIcon size={20} />,
       label: "Send order confirmation",
       onClick: async () => {
-        let url = VITE_MEDUSA_BACKEND_URL + '/send-order-confirmation/' + orderId
+        let url = '/backend/send-order-confirmation/' + orderId
         let data = await fetch(url, {
           method: 'GET',
           headers: {

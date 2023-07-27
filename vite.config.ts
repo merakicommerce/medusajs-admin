@@ -48,7 +48,13 @@ export default defineConfig(({ command, mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ""),
         },
+        "/backend": {
+          target: env.VITE_MEDUSA_BACKEND_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/backend/, ""),
+        },
       },
+
     },
   }
 })
