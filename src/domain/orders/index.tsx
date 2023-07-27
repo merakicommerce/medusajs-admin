@@ -13,7 +13,6 @@ import useToggleState from "../../hooks/use-toggle-state"
 import { getErrorMessage } from "../../utils/error-messages"
 import { formatAmountWithSymbol } from "../../utils/prices"
 import Details from "./details"
-import data from './sample.json'
 import { transformFiltersAsExportContext } from "./utils"
 const VIEWS = ["orders", "drafts"]
 
@@ -34,15 +33,14 @@ const OrderIndex = () => {
     state: exportModalOpen,
   } = useToggleState(false)
   const handleDownloadOrdersCsv = async () => {
-    // const url = "/api/admin/export_orders"
-    // let data = await fetch(url, {
-    //   method: 'GET',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': 'Bearer ' + localStorage.getItem('token')
-    //   }
-    // }).then(res => res.json())
-    // console.log({ data })
+    const url = "/api/admin/export_orders"
+    let data = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('token')
+      }
+    }).then(res => res.json())
     function jsonToCsc(json) {
       var fields = Object.keys(json[0])
       var replacer = function (key, value) { return value === null ? '' : value }

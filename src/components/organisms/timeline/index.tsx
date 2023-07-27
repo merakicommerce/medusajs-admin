@@ -13,15 +13,15 @@ import {
   ItemsShippedEvent,
   NoteEvent,
   NotificationEvent,
-  OrderPlacedEvent,
   OrderEditEvent,
+  OrderEditRequestedEvent,
+  OrderPlacedEvent,
+  PaymentRequiredEvent,
   RefundEvent,
+  RefundRequiredEvent,
   ReturnEvent,
   TimelineEvent,
   useBuildTimeline,
-  OrderEditRequestedEvent,
-  RefundRequiredEvent,
-  PaymentRequiredEvent,
 } from "../../../hooks/use-build-timeline"
 import useNotification from "../../../hooks/use-notification"
 import { getErrorMessage } from "../../../utils/error-messages"
@@ -29,6 +29,7 @@ import Spinner from "../../atoms/spinner"
 import AlertIcon from "../../fundamentals/icons/alert-icon"
 import BackIcon from "../../fundamentals/icons/back-icon"
 import RefreshIcon from "../../fundamentals/icons/refresh-icon"
+import SendIcon from "../../fundamentals/icons/send-icon"
 import Actionables, { ActionType } from "../../molecules/actionables"
 import NoteInput from "../../molecules/note-input"
 import Claim from "../../molecules/timeline-events/claim"
@@ -42,12 +43,12 @@ import EditCanceled from "../../molecules/timeline-events/order-edit/canceled"
 import EditConfirmed from "../../molecules/timeline-events/order-edit/confirmed"
 import EditCreated from "../../molecules/timeline-events/order-edit/created"
 import EditDeclined from "../../molecules/timeline-events/order-edit/declined"
+import PaymentRequired from "../../molecules/timeline-events/order-edit/payment-required"
+import RefundRequired from "../../molecules/timeline-events/order-edit/refund-required"
 import EditRequested from "../../molecules/timeline-events/order-edit/requested"
 import OrderPlaced from "../../molecules/timeline-events/order-placed"
 import Refund from "../../molecules/timeline-events/refund"
 import Return from "../../molecules/timeline-events/return"
-import PaymentRequired from "../../molecules/timeline-events/order-edit/payment-required"
-import RefundRequired from "../../molecules/timeline-events/order-edit/refund-required"
 
 type TimelineProps = {
   orderId: string
@@ -67,6 +68,25 @@ const Timeline: React.FC<TimelineProps> = ({ orderId }) => {
   const [showCreateClaim, setshowCreateClaim] = useState(false)
 
   const actions: ActionType[] = [
+    {
+      icon: <SendIcon size={20} />,
+      label: "Send order confirmation",
+      onClick: async () => {
+        let url = '/api/send-order-confirmation/' + orderId
+        let data = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        }).then(res => res.json())
+        if (data?.status === "success") {
+          notification("Success", "Order confirmation email sent", "success")
+        } else {
+          notification("Error", "There is problem when sending order confirmation email", "error")
+        }
+      },
+    },
     {
       icon: <BackIcon size={20} />,
       label: "Request Return",
