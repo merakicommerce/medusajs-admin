@@ -72,7 +72,7 @@ const Timeline: React.FC<TimelineProps> = ({ orderId }) => {
       icon: <SendIcon size={20} />,
       label: "Send order confirmation",
       onClick: async () => {
-        let url = '/backend/send-order-confirmation/' + orderId
+        let url = '/api/send-order-confirmation/' + orderId
         let data = await fetch(url, {
           method: 'GET',
           headers: {
