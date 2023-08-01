@@ -169,7 +169,7 @@ const OrderIndex = () => {
   const [data = [], setData] = useState(cachedata)
   useLayoutEffect(() => {
     Medusa.abadonedCarts.list().then((res) => {
-      cachedata = res.data.filter(filter)
+      cachedata = res.filter(filter)
       setData(cachedata)
     })
   }, [])
@@ -202,7 +202,7 @@ const OrderIndex = () => {
                 onClick() {
                   setData(null)
                   Medusa.abadonedCarts.list().then((res) => {
-                    cachedata = res.data.filter(filter)
+                    cachedata = res.filter(filter)
                     setData(cachedata)
                   })
                 },
@@ -248,8 +248,8 @@ const OrderIndex = () => {
             <AbadonedCartsTable
               key={String(state)}
               {...{
-                data: (data || [])
-                  .sort((a, b) => {
+                data: (data)
+                  ?.sort((a, b) => {
                     return state
                       ? new Date(a.created_at) - new Date(b.created_at)
                       : -(new Date(a.created_at) - new Date(b.created_at))
@@ -260,7 +260,7 @@ const OrderIndex = () => {
                       new Date(item.created_at) > new Date(startDate) &&
                       new Date(item.created_at) < new Date(compareEndDate)
                     )
-                  }),
+                  }) || [],
               }}
             />
           </BodyCard>
@@ -276,7 +276,7 @@ const DetailsModal = ({ handleCancel }) => {
   const navigate = useNavigate()
   useLayoutEffect(() => {
     Medusa.abadonedCarts.retrieve(id).then((res) => {
-      setData(res.data)
+      setData(res)
     })
   }, [id])
   useLayoutEffect(() => {
