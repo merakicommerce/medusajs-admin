@@ -1,3 +1,4 @@
+import { VITE_MEDUSA_BACKEND_URL } from "./config"
 import medusaRequest from "./request"
 
 const removeNullish = (obj) =>
@@ -16,11 +17,11 @@ export default {
   abadonedCarts: {
     list() {
       const path = `/admin/abandon_carts`
-      return medusaRequest("GET", path)
+      return fetch(VITE_MEDUSA_BACKEND_URL + path).then((res) => res.json())
     },
     retrieve(cartid) {
       const path = `/admin/abandon_cart/${cartid}`
-      return medusaRequest("GET", path)
+      return fetch(VITE_MEDUSA_BACKEND_URL + path).then((res) => res.json())
     },
   },
   returnReasons: {
