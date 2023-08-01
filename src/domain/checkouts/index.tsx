@@ -197,8 +197,8 @@ const OrderIndex = () => {
             actionables={[
               {
                 label: "Refresh",
-                icon: <RefreshIcon />,
-                disabled: !data,
+                icon: data?.length ? <RefreshIcon /> : <RefreshIcon className="animate-spin" />,
+                disabled: !data?.length,
                 onClick() {
                   setData(null)
                   Medusa.abadonedCarts.list().then((res) => {
