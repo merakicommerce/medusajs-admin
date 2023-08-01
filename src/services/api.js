@@ -16,11 +16,11 @@ export default {
   abadonedCarts: {
     list() {
       const path = `/admin/abandon_cart`
-      return fetch("/backend" + path).then((res) => res.json())
+      return fetch("/backend" + path).then((res) => ({ data: res.json() }))
     },
     retrieve(cartid) {
       const path = `/admin/abandon_cart/${cartid}`
-      return fetch("/backend" + path).then((res) => res.json())
+      return fetch("/backend" + path).then((res) => ({ data: res.json() }))
     },
   },
   returnReasons: {
