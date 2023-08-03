@@ -1,4 +1,5 @@
 import clsx from "clsx"
+import { useAdminRegions } from "medusa-react"
 import moment from "moment"
 import { useLayoutEffect, useMemo, useState } from "react"
 import { Route, Routes, useNavigate, useParams } from "react-router-dom"
@@ -178,6 +179,7 @@ const OrderIndex = () => {
   const [startDate, setStartDate] = useState()
   const [endDate, setEndDate] = useState()
   const compareEndDate = moment(endDate).add("days", 1)
+
   return (
     <>
       <div className="flex flex-col h-full grow">
@@ -269,7 +271,7 @@ const OrderIndex = () => {
     </>
   )
 }
-const DetailsModal = ({ handleCancel }) => {
+const DetailsModal = ({ handleCancel, regions }) => {
   const { id } = useParams()
   const [data, setData] = useState()
   const [customer, setCustomer] = useState()
@@ -291,7 +293,7 @@ const DetailsModal = ({ handleCancel }) => {
     result = result + item.quantity * item.unit_price
     return result
   }, 0)
-  let currencyCode = data?.cart?.currency_code || "GBP"
+  let currencyCode = regions.find(reg => reg.id === data?.cart.region_id).currency_code || "GBP"
   const customerActionables: ActionType[] = [
     {
       label: "Go to Customer",
@@ -362,13 +364,23 @@ const DetailsModal = ({ handleCancel }) => {
 }
 const Checkouts = () => {
   const navigate = useNavigate()
+  const [regionsPagination, setRegionsPagination] = useState({
+    offset: 0,
+    limit: 99,
+  })
+  const {
+    regions,
+    count,
+    isLoading: isLoadingRegions,
+  } = useAdminRegions(regionsPagination)
+
   return (
     <div>
       <OrderIndex />
       <Routes>
         <Route
           path="/:id"
-          element={<DetailsModal handleCancel={() => navigate(-1)} />}
+          element={<DetailsModal regions={regions} handleCancel={() => navigate(-1)} />}
         />
       </Routes>
     </div>
