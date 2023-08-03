@@ -293,7 +293,8 @@ const DetailsModal = ({ handleCancel, regions }) => {
     result = result + item.quantity * item.unit_price
     return result
   }, 0)
-  let currencyCode = regions.find(reg => reg.id === data?.cart.region_id).currency_code || "GBP"
+  console.log({ regions, data })
+  let currencyCode = regions.find(reg => reg.id === data?.cart.region_id)?.currency_code || "GBP"
   const customerActionables: ActionType[] = [
     {
       label: "Go to Customer",
