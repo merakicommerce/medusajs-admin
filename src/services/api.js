@@ -1,4 +1,4 @@
-import medusaRequest from "./request"
+import medusaRequest, {backendRequest} from "./request"
 
 const removeNullish = (obj) =>
   Object.entries(obj).reduce((a, [k, v]) => (v ? ((a[k] = v), a) : a), {})
@@ -16,11 +16,11 @@ export default {
   abadonedCarts: {
     list() {
       const path = `/admin/abandon_cart`
-      return fetch("/backend" + path).then((res) => res.json())
+      return backendRequest(path).then((res) => res.json())
     },
     retrieve(cartid) {
       const path = `/admin/abandon_cart/${cartid}`
-      return fetch("/backend" + path).then((res) => res.json())
+      return backendRequest(path).then((res) => res.json())
     },
   },
   returnReasons: {
