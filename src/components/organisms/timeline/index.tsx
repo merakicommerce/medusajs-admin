@@ -1,5 +1,5 @@
 import clsx from "clsx"
-import { useAdminCreateNote, useAdminOrder } from "medusa-react"
+import { useAdminCreateNote, useAdminOrder, useMedusa } from "medusa-react"
 import React, { useState } from "react"
 
 import ClaimMenu from "../../../domain/orders/details/claim/create"
@@ -66,6 +66,7 @@ const Timeline: React.FC<TimelineProps> = ({ orderId }) => {
   const [showRequestReturn, setShowRequestReturn] = useState(false)
   const [showCreateSwap, setshowCreateSwap] = useState(false)
   const [showCreateClaim, setshowCreateClaim] = useState(false)
+  const { client } = useMedusa()
 
   const actions: ActionType[] = [
     {
@@ -73,13 +74,7 @@ const Timeline: React.FC<TimelineProps> = ({ orderId }) => {
       label: "Send order confirmation",
       onClick: async () => {
         let url = '/api/send-order-confirmation/' + orderId
-        let data = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          }
-        }).then(res => res.json())
+        let data = await client.admin.orders.client.request('GET', url).then(res => res.json())
         if (data?.status === "ok") {
           notification("Success", "Order confirmation email sent", "success")
         } else {
