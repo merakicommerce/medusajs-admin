@@ -106,7 +106,7 @@
     "build": "vite build",
     "preview": "vite preview --port 7000",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "start": "npm run dev",
+    "start": "vite preview --port 7000",
     "serve": "npm run preview",
     "test": "echo \"Write tests! && exit 1",
     "storybook": "start-storybook -p 6006",
