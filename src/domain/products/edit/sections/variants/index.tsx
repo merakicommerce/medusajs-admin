@@ -28,6 +28,8 @@ const VariantsSection = ({ product }: Props) => {
   const [variantToUpdateImages, setVariantToUpdateImages] = useState<
     { base: ProductVariant } | undefined
   >(undefined)
+  const [variantToUpdateInstagramImages, setVariantToUpdateInstagramImages] =
+    useState<{ base: ProductVariant } | undefined>(undefined)
   const [variantToUpdateDimension, setVariantToUpdateDimension] = useState<
     { base: ProductVariant } | undefined
   >(undefined)
@@ -88,6 +90,9 @@ const VariantsSection = ({ product }: Props) => {
   const handleUpdateImagesVariant = (variant: ProductVariant) => {
     setVariantToUpdateImages({ base: variant })
   }
+  const handleUpdateInstagramImagesVariant = (variant: ProductVariant) => {
+    setVariantToUpdateInstagramImages({ base: variant })
+  }
   const handleUpdateDimensionImageVariant = (variant: ProductVariant) => {
     setVariantToUpdateDimension({ base: variant })
   }
@@ -112,6 +117,7 @@ const VariantsSection = ({ product }: Props) => {
               updateVariant: handleEditVariant,
               duplicateVariant: handleDuplicateVariant,
               updateImagesVariant: handleUpdateImagesVariant,
+              updateInstagramImagesVariant: handleUpdateInstagramImagesVariant,
               updateDimensionImageVariant: handleUpdateDimensionImageVariant,
               updateMetadataVariant: handleUpdateMetadataVariant,
             }}
@@ -143,9 +149,18 @@ const VariantsSection = ({ product }: Props) => {
       )}
       {variantToUpdateImages && (
         <EditImagesVariantModal
+          name="images"
           variant={variantToUpdateImages.base}
           product={product}
           onClose={() => setVariantToUpdateImages(undefined)}
+        />
+      )}
+      {variantToUpdateInstagramImages && (
+        <EditImagesVariantModal
+          name="images-instagram"
+          variant={variantToUpdateInstagramImages.base}
+          product={product}
+          onClose={() => setVariantToUpdateInstagramImages(undefined)}
         />
       )}
       {variantToUpdateDimension && (

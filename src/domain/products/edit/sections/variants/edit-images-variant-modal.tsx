@@ -12,23 +12,21 @@ import EditImagesVariantForm, {
 import useEditProductActions from "../../hooks/use-edit-product-actions"
 
 type Props = {
+  name: string
   onClose: () => void
   product: Product
   variant: ProductVariant
 }
-export const createUpdatePayload = (
-  data: EditImagesVariantFormType
+export const createUpdatePayload = <T extends string>(
+  data: EditImagesVariantFormType<T>
 ): AdminPostProductsProductVariantsVariantReq => {
-  const { images } = data
   return {
-    metadata: {
-      images,
-    },
+    metadata: data,
   }
 }
-const EditImagesVariantModal = ({ onClose, product, variant }: Props) => {
-  const form = useForm<EditImagesVariantFormType>({
-    defaultValues: getEditImagesVariantDefaultValues(variant),
+const EditImagesVariantModal = ({ onClose, product, variant, name }: Props) => {
+  const form = useForm<EditImagesVariantFormType<typeof name>>({
+    defaultValues: getEditImagesVariantDefaultValues(variant, name),
   })
 
   const {
@@ -38,7 +36,7 @@ const EditImagesVariantModal = ({ onClose, product, variant }: Props) => {
   } = form
 
   const handleClose = () => {
-    reset(getEditImagesVariantDefaultValues(variant))
+    reset(getEditImagesVariantDefaultValues(variant, name))
     onClose()
   }
 
@@ -70,7 +68,7 @@ const EditImagesVariantModal = ({ onClose, product, variant }: Props) => {
       ></style>
       <form onSubmit={onSubmit} noValidate>
         <Modal.Content>
-          <EditImagesVariantForm form={form} />
+          <EditImagesVariantForm form={form} name={name} />
         </Modal.Content>
         <Modal.Footer>
           <div className="flex items-center justify-end w-full gap-x-xsmall">
@@ -98,11 +96,13 @@ const EditImagesVariantModal = ({ onClose, product, variant }: Props) => {
   )
 }
 
-export const getEditImagesVariantDefaultValues = (
-  variant: ProductVariant
-): EditImagesVariantFormType => {
+export const getEditImagesVariantDefaultValues = <T extends string>(
+  variant: ProductVariant,
+  name: T
+): EditImagesVariantFormType<T> => {
+  console.log({ "variant.metadata?.[name] ": variant.metadata?.[name], name })
   return {
-    images: variant.metadata?.images || [],
+    [name]: (variant.metadata?.[name] as string[]) || [],
   }
 }
 

@@ -3,12 +3,13 @@ import TrashIcon from "../../../../../components/fundamentals/icons/trash-icon"
 import { ActionType } from "../../../../../components/molecules/actionables"
 import Section from "../../../../../components/organisms/section"
 
-export type EditImagesVariantFormType = {
-  images: string[]
+export type EditImagesVariantFormType<T extends string> = {
+  [key in T]: string[]
 }
 
-type Props = {
-  form: UseFormReturn<EditImagesVariantFormType, any>
+interface Props<T extends string> {
+  name: T
+  form: UseFormReturn<EditImagesVariantFormType<T>, any>
 }
 
 type MediaSectionProps = {
@@ -81,24 +82,24 @@ const MediaSection = ({ images, onAdd, onRemove }: MediaSectionProps) => {
   )
 }
 
-const EditImagesVariantForm = ({ form }: Props) => {
+const EditImagesVariantForm = <T extends string>({ form, name }: Props<T>) => {
   return (
     <div>
       <Controller
-        name="images"
+        name={name}
         control={form.control}
         render={({ field }) => {
           console.log({ field })
           return (
             <MediaSection
               onAdd={({ url }) => {
-                console.log([...form.getValues("images"), url])
-                form.setValue("images", [...form.getValues("images"), url])
+                console.log([...form.getValues(name), url])
+                form.setValue(name, [...form.getValues(name), url])
               }}
               onRemove={({ url }) => {
                 form.setValue(
-                  "images",
-                  form.getValues("images").filter((img) => img !== url)
+                  name,
+                  form.getValues(name).filter((img) => img !== url)
                 )
               }}
               images={field.value}

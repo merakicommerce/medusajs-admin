@@ -15,6 +15,7 @@ type Props = {
     duplicateVariant: (variant: ProductVariant) => void
     updateVariant: (variant: ProductVariant) => void
     updateImagesVariant: (variant: ProductVariant) => void
+    updateInstagramImagesVariant: (variant: ProductVariant) => void
     updateMetadataVariant: (variant: ProductVariant) => void
     updateDimensionImageVariant: (variant: ProductVariant) => void
   }
@@ -95,10 +96,11 @@ const VariantsTable = ({ variants, actions }: Props) => {
   const {
     deleteVariant,
     updateImagesVariant,
+    updateInstagramImagesVariant,
     updateVariant,
     duplicateVariant,
     updateMetadataVariant,
-    updateDimensionImageVariant
+    updateDimensionImageVariant,
   } = actions
 
   return (
@@ -143,12 +145,19 @@ const VariantsTable = ({ variants, actions }: Props) => {
                       },
                       {
                         label: "Update Dimension Image",
-                        onClick: () => updateDimensionImageVariant(row.original),
+                        onClick: () =>
+                          updateDimensionImageVariant(row.original),
                         icon: <UploadIcon size="20" />,
                       },
                       {
                         label: "Update Images",
                         onClick: () => updateImagesVariant(row.original),
+                        icon: <UploadIcon size="20" />,
+                      },
+                      {
+                        label: "Update Instagram Images",
+                        onClick: () =>
+                          updateInstagramImagesVariant(row.original),
                         icon: <UploadIcon size="20" />,
                       },
                       {
