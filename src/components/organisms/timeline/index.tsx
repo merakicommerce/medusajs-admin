@@ -73,13 +73,21 @@ const Timeline: React.FC<TimelineProps> = ({ orderId }) => {
       icon: <SendIcon size={20} />,
       label: "Send order confirmation",
       onClick: async () => {
-        let url = '/api/send-order-confirmation/' + orderId
-        let data = await client.admin.orders.client.request('GET', url)
-        if (data?.status === "ok") {
-          notification("Success", "Order confirmation email sent", "success")
-        } else {
+        try {
+          let url = '/api/send-order-confirmation/' + orderId
+          let data = await client.admin.orders.client.request('GET', url)
+          if (data) {
+            notification("Success", "Order confirmation email sent", "success")
+          }
+          // if (data?.status === "ok") {
+          //   notification("Success", "Order confirmation email sent", "success")
+          // } else {
+          // }
+        } catch (error) {
+          console.error(error)
           notification("Error", "There is problem when sending order confirmation email", "error")
         }
+
       },
     },
     {
