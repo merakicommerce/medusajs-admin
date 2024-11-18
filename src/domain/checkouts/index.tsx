@@ -273,8 +273,140 @@ const OrderIndex = () => {
 }
 const DetailsModal = ({ handleCancel, regions }) => {
   const { id } = useParams()
-  const [data, setData] = useState()
-  const [customer, setCustomer] = useState()
+  const [data, setData] = useState<{
+    "cart": {
+      "id": "cart_01JCXX9QWQFE4X5J2DK5D64F0K",
+      "email": "josdesmul@telenet.be",
+      "billing_address_id": "addr_01JCXXTCYFB045T1FE9P2NNXHS",
+      "shipping_address_id": "addr_01JCXX9R3J8WZ7801YWZAKHKMT",
+      "region_id": "reg_01GRN602N4P9CZ01XM90PQ5D6G",
+      "customer_id": "cus_01JCXXTCY4S2JAEHV4F3SXVB1J",
+      "payment_id": null,
+      "type": "default",
+      "completed_at": null,
+      "created_at": "2024-11-17T20:33:46.900Z",
+      "updated_at": "2024-11-17T20:42:52.721Z",
+      "deleted_at": null,
+      "metadata": null,
+      "idempotency_key": null,
+      "context": {
+        "ip": "2a02:1812:171c:db00:acbf:e1d5:c802:17",
+        "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1"
+      },
+      "payment_authorized_at": null
+    },
+    "address": {
+      "id": "addr_01JCXXTCYFB045T1FE9P2NNXHS",
+      "customer_id": null,
+      "company": "",
+      "first_name": "Jos",
+      "last_name": "De Smul",
+      "address_1": "Fresiastraat 16",
+      "address_2": "",
+      "city": "Drongen",
+      "country_code": "be",
+      "province": "",
+      "postal_code": "9031",
+      "phone": "0032495248248",
+      "created_at": "2024-11-17T20:42:52.721Z",
+      "updated_at": "2024-11-17T20:42:52.721Z",
+      "deleted_at": null,
+      "metadata": null
+    },
+    "lineItems": [
+      {
+        "id": "item_01JCXXN7XKARBKX6DBNY0R38YK",
+        "cart_id": "cart_01JCXX9QWQFE4X5J2DK5D64F0K",
+        "order_id": null,
+        "swap_id": null,
+        "title": "No. 42 Chair",
+        "description": "Ash/Dark Blue",
+        "thumbnail": "https://imageproxy.designereditions.com/api/images/dfgbpib38/image/upload/e_trim/media/catalog/product/n/o/no._42_red_01_1.png",
+        "is_giftcard": false,
+        "should_merge": true,
+        "allow_discounts": true,
+        "has_shipping": true,
+        "unit_price": 23141,
+        "variant_id": "variant_01GPR3VQK05E72X8ZJW9FJSE7R",
+        "quantity": 6,
+        "fulfilled_quantity": null,
+        "returned_quantity": null,
+        "shipped_quantity": null,
+        "created_at": "2024-11-17T20:40:03.739Z",
+        "updated_at": "2024-11-17T22:06:02.723Z",
+        "metadata": {},
+        "claim_order_id": null,
+        "is_return": false
+      },
+      {
+        "id": "item_01JCY2HYYTAVD1P0XT0JM32HR9",
+        "cart_id": "cart_01JCXX9QWQFE4X5J2DK5D64F0K",
+        "order_id": null,
+        "swap_id": null,
+        "title": "CH20 Elbow Chair",
+        "description": "Black/Solid Oak",
+        "thumbnail": "https://imageproxy.designereditions.com/api/images/dfgbpib38/image/upload/e_trim/media/catalog/product/c/h/ch20_elbow_chair_ash_black_leather_04_1.png",
+        "is_giftcard": false,
+        "should_merge": true,
+        "allow_discounts": true,
+        "has_shipping": true,
+        "unit_price": 40392,
+        "variant_id": "variant_01GPR3WDX07JH7ECC3M5BA9W3T",
+        "quantity": 6,
+        "fulfilled_quantity": null,
+        "returned_quantity": null,
+        "shipped_quantity": null,
+        "created_at": "2024-11-17T22:05:39.133Z",
+        "updated_at": "2024-11-17T22:06:02.723Z",
+        "metadata": {},
+        "claim_order_id": null,
+        "is_return": false
+      }
+    ]
+  } | undefined>()
+  const [customer, setCustomer] = useState<{
+    "id": "cus_01J27FX1VJPGPT8DYH94KB0PKS",
+    "created_at": "2024-07-07T20:59:23.886Z",
+    "updated_at": "2024-07-07T21:02:16.367Z",
+    "deleted_at": null,
+    "email": "bjerrehoej@hotmail.com",
+    "first_name": "Bjørn",
+    "last_name": "Bjerrehøj",
+    "billing_address_id": null,
+    "phone": "+4530951983",
+    "has_account": true,
+    "metadata": {
+      "stripe_id": "cus_QQu1giyj5A9PUu"
+    },
+    "orders": [
+      {
+        "object": "order",
+        "id": "order_01J2B33QDDCTBJD6EA51BWVTJB",
+        "created_at": "2024-07-09T06:32:48.510Z",
+        "updated_at": "2024-07-09T06:32:49.256Z",
+        "status": "pending",
+        "fulfillment_status": "not_fulfilled",
+        "payment_status": "captured",
+        "display_id": 3522,
+        "cart_id": "cart_01J28GQXVPVD6CNF0BPMSVJZ1Y",
+        "customer_id": "cus_01J27FX1VJPGPT8DYH94KB0PKS",
+        "email": "bjerrehoej@hotmail.com",
+        "billing_address_id": "addr_01J2B2YPNMZKK4CFXKQ47W2PWP",
+        "shipping_address_id": "addr_01J28GQY2PVZC2JWX0XZHH2X9B",
+        "region_id": "reg_01H18MYMM1RGYHX9KVZ6REB8KG",
+        "currency_code": "gbp",
+        "tax_rate": null,
+        "draft_order_id": null,
+        "canceled_at": null,
+        "metadata": {},
+        "no_notification": null,
+        "idempotency_key": null,
+        "external_id": null,
+        "sales_channel_id": "sc_01GPN8RM7FB1G8KWMW1AG6W410"
+      }
+    ],
+    "shipping_addresses": []
+  } | undefined>()
   const navigate = useNavigate()
   useLayoutEffect(() => {
     Medusa.abadonedCarts.retrieve(id).then((res) => {
@@ -347,15 +479,35 @@ const DetailsModal = ({ handleCancel, regions }) => {
                     />
                   </div>
                   {customer ? (
+
                     <div>
                       <div>{customer.first_name}</div>
                       <div>{data?.cart.email}</div>
                     </div>
+
+
                   ) : (
                     <Spinner size={"large"} variant={"secondary"} />
                   )}
                 </div>
               </div>
+
+              {
+                data?.address && <div className="space-y-3 mt-6 border p-6">
+                  <div className="font-bold mb-6">Address</div>
+                  {
+                    Object.entries(data?.address).map(([key, value], i) => {
+                      let igonreList = ['id', 'customer_id', 'created_at', 'updated_at', 'deleted_at', 'metadata']
+                      if (igonreList.includes(key))
+                        return null
+                      return <div key={i} className="flex gap-3">
+                        <div className="font-bold text-xs flex-shrink-0 w-1/4 min-w-[120px] capitalize">{key.replaceAll("_", " ")}</div>
+                        <div>: {String(value) || "-----"}</div>
+                      </div>
+                    })
+                  }
+                </div>
+              }
             </BodyCard>
           </div>
         </Modal.Content>
