@@ -25,73 +25,74 @@ import Medusa from "../../services/api"
 import OrderLine from "./details/order-line"
 import { DisplayTotal } from "./details/templates/display-total"
 const VIEWS = ["Abandoned Checkouts"]
-let cachedata = []
-const AbadonedCartsTable = ({ data }: {
-  data: {
-    "cart": "cart_01JD1QT2RNVQ0WWXTGYW8QF3QC",
-    "address": {
-      "id": "addr_01JD1QT373WXZZYAB5Y56KVBMW",
-      "customer_id": null,
-      "company": "",
-      "first_name": "Roman",
-      "last_name": "Seer",
-      "address_1": "Freyweg 30",
-      "address_2": "",
-      "city": "Bergheim",
-      "country_code": "at",
-      "province": "",
-      "postal_code": "5101",
-      "phone": "+4366488854313",
-      "created_at": "2024-11-19T08:14:49.033Z",
-      "updated_at": "2024-11-19T08:27:25.687Z",
-      "deleted_at": null,
-      "metadata": null
-    },
-    "lineItems": [
-      {
-        "id": "item_01JD1REXFW5MTCXVSTYYWG5B2E",
-        "cart_id": "cart_01JD1QT2RNVQ0WWXTGYW8QF3QC",
-        "order_id": null,
-        "swap_id": null,
-        "title": "Eames Style Hang It All Coat Rack",
-        "description": "Green Multitone",
-        "thumbnail": "https://imageproxy.designereditions.com/api/images/dfgbpib38/image/upload/e_trim/media/catalog/product/5/a/5aa00c788a7ae.png",
-        "is_giftcard": false,
-        "should_merge": true,
-        "allow_discounts": true,
-        "has_shipping": true,
-        "unit_price": 7079,
-        "variant_id": "variant_01GPR3XC7A8YSQDQTAKWYA2QFQ",
-        "quantity": 1,
-        "fulfilled_quantity": null,
-        "returned_quantity": null,
-        "shipped_quantity": null,
-        "created_at": "2024-11-19T08:26:11.300Z",
-        "updated_at": "2024-11-19T08:27:26.018Z",
-        "metadata": {},
-        "claim_order_id": null,
-        "is_return": false
-      }
-    ],
-    "email": "roman.seer@gmx.at",
-    "billing_address_id": "addr_01JD1RH64XWD0VWERM7SRJFD6W",
-    "shipping_address_id": "addr_01JD1QT373WXZZYAB5Y56KVBMW",
-    "region_id": "reg_01GRN5YPG0WVZD6TK8CZRGQ60J",
-    "customer_id": "cus_01JD1RH64GQ6QRFM1SN5GZF6ET",
-    "payment_id": null,
-    "type": "default",
-    "completed_at": null,
-    "created_at": "2024-11-19T08:14:48.592Z",
+type AbadonedCart = {
+  "cart": "cart_01JD1QT2RNVQ0WWXTGYW8QF3QC",
+  "address": {
+    "id": "addr_01JD1QT373WXZZYAB5Y56KVBMW",
+    "customer_id": null,
+    "company": "",
+    "first_name": "Roman",
+    "last_name": "Seer",
+    "address_1": "Freyweg 30",
+    "address_2": "",
+    "city": "Bergheim",
+    "country_code": "at",
+    "province": "",
+    "postal_code": "5101",
+    "phone": "+4366488854313",
+    "created_at": "2024-11-19T08:14:49.033Z",
     "updated_at": "2024-11-19T08:27:25.687Z",
     "deleted_at": null,
-    "metadata": null,
-    "idempotency_key": null,
-    "context": {
-      "ip": "80.120.140.228",
-      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    },
-    "payment_authorized_at": null
-  }[]
+    "metadata": null
+  },
+  "lineItems": [
+    {
+      "id": "item_01JD1REXFW5MTCXVSTYYWG5B2E",
+      "cart_id": "cart_01JD1QT2RNVQ0WWXTGYW8QF3QC",
+      "order_id": null,
+      "swap_id": null,
+      "title": "Eames Style Hang It All Coat Rack",
+      "description": "Green Multitone",
+      "thumbnail": "https://imageproxy.designereditions.com/api/images/dfgbpib38/image/upload/e_trim/media/catalog/product/5/a/5aa00c788a7ae.png",
+      "is_giftcard": false,
+      "should_merge": true,
+      "allow_discounts": true,
+      "has_shipping": true,
+      "unit_price": 7079,
+      "variant_id": "variant_01GPR3XC7A8YSQDQTAKWYA2QFQ",
+      "quantity": 1,
+      "fulfilled_quantity": null,
+      "returned_quantity": null,
+      "shipped_quantity": null,
+      "created_at": "2024-11-19T08:26:11.300Z",
+      "updated_at": "2024-11-19T08:27:26.018Z",
+      "metadata": {},
+      "claim_order_id": null,
+      "is_return": false
+    }
+  ],
+  "email": "roman.seer@gmx.at",
+  "billing_address_id": "addr_01JD1RH64XWD0VWERM7SRJFD6W",
+  "shipping_address_id": "addr_01JD1QT373WXZZYAB5Y56KVBMW",
+  "region_id": "reg_01GRN5YPG0WVZD6TK8CZRGQ60J",
+  "customer_id": "cus_01JD1RH64GQ6QRFM1SN5GZF6ET",
+  "payment_id": null,
+  "type": "default",
+  "completed_at": null,
+  "created_at": "2024-11-19T08:14:48.592Z",
+  "updated_at": "2024-11-19T08:27:25.687Z",
+  "deleted_at": null,
+  "metadata": null,
+  "idempotency_key": null,
+  "context": {
+    "ip": "80.120.140.228",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+  },
+  "payment_authorized_at": null
+}
+let cachedata: AbadonedCart[] = []
+const AbadonedCartsTable = ({ data }: {
+  data: AbadonedCart[]
 }) => {
   const columns = useMemo(
     () => [
@@ -230,74 +231,10 @@ const AbadonedCartsTable = ({ data }: {
     </TableContainer>
   )
 }
-const filter = (item) => Boolean(item.email)
+const filter = (item: AbadonedCart) => Boolean(item.email) && item.lineItems?.length
 const OrderIndex = () => {
   const view = "Abandoned Checkouts"
-  const [data = [], setData] = useState<{
-    "cart": "cart_01JD1QT2RNVQ0WWXTGYW8QF3QC",
-    "address": {
-      "id": "addr_01JD1QT373WXZZYAB5Y56KVBMW",
-      "customer_id": null,
-      "company": "",
-      "first_name": "Roman",
-      "last_name": "Seer",
-      "address_1": "Freyweg 30",
-      "address_2": "",
-      "city": "Bergheim",
-      "country_code": "at",
-      "province": "",
-      "postal_code": "5101",
-      "phone": "+4366488854313",
-      "created_at": "2024-11-19T08:14:49.033Z",
-      "updated_at": "2024-11-19T08:27:25.687Z",
-      "deleted_at": null,
-      "metadata": null
-    },
-    "lineItems": [
-      {
-        "id": "item_01JD1REXFW5MTCXVSTYYWG5B2E",
-        "cart_id": "cart_01JD1QT2RNVQ0WWXTGYW8QF3QC",
-        "order_id": null,
-        "swap_id": null,
-        "title": "Eames Style Hang It All Coat Rack",
-        "description": "Green Multitone",
-        "thumbnail": "https://imageproxy.designereditions.com/api/images/dfgbpib38/image/upload/e_trim/media/catalog/product/5/a/5aa00c788a7ae.png",
-        "is_giftcard": false,
-        "should_merge": true,
-        "allow_discounts": true,
-        "has_shipping": true,
-        "unit_price": 7079,
-        "variant_id": "variant_01GPR3XC7A8YSQDQTAKWYA2QFQ",
-        "quantity": 1,
-        "fulfilled_quantity": null,
-        "returned_quantity": null,
-        "shipped_quantity": null,
-        "created_at": "2024-11-19T08:26:11.300Z",
-        "updated_at": "2024-11-19T08:27:26.018Z",
-        "metadata": {},
-        "claim_order_id": null,
-        "is_return": false
-      }
-    ],
-    "email": "roman.seer@gmx.at",
-    "billing_address_id": "addr_01JD1RH64XWD0VWERM7SRJFD6W",
-    "shipping_address_id": "addr_01JD1QT373WXZZYAB5Y56KVBMW",
-    "region_id": "reg_01GRN5YPG0WVZD6TK8CZRGQ60J",
-    "customer_id": "cus_01JD1RH64GQ6QRFM1SN5GZF6ET",
-    "payment_id": null,
-    "type": "default",
-    "completed_at": null,
-    "created_at": "2024-11-19T08:14:48.592Z",
-    "updated_at": "2024-11-19T08:27:25.687Z",
-    "deleted_at": null,
-    "metadata": null,
-    "idempotency_key": null,
-    "context": {
-      "ip": "80.120.140.228",
-      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    },
-    "payment_authorized_at": null
-  }[]>(cachedata)
+  const [data = [], setData] = useState<AbadonedCart[] | null>(cachedata)
   useLayoutEffect(() => {
     Medusa.abadonedCarts.list().then((res) => {
       cachedata = res.filter(filter)
