@@ -340,97 +340,7 @@ const OrderIndex = () => {
 }
 const DetailsModal = ({ handleCancel, regions }) => {
   const { id } = useParams()
-  const [data, setData] = useState<{
-    "cart": {
-      "id": "cart_01JCXX9QWQFE4X5J2DK5D64F0K",
-      "email": "josdesmul@telenet.be",
-      "billing_address_id": "addr_01JCXXTCYFB045T1FE9P2NNXHS",
-      "shipping_address_id": "addr_01JCXX9R3J8WZ7801YWZAKHKMT",
-      "region_id": "reg_01GRN602N4P9CZ01XM90PQ5D6G",
-      "customer_id": "cus_01JCXXTCY4S2JAEHV4F3SXVB1J",
-      "payment_id": null,
-      "type": "default",
-      "completed_at": null,
-      "created_at": "2024-11-17T20:33:46.900Z",
-      "updated_at": "2024-11-17T20:42:52.721Z",
-      "deleted_at": null,
-      "metadata": null,
-      "idempotency_key": null,
-      "context": {
-        "ip": "2a02:1812:171c:db00:acbf:e1d5:c802:17",
-        "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1"
-      },
-      "payment_authorized_at": null
-    },
-    "address": {
-      "id": "addr_01JCXXTCYFB045T1FE9P2NNXHS",
-      "customer_id": null,
-      "company": "",
-      "first_name": "Jos",
-      "last_name": "De Smul",
-      "address_1": "Fresiastraat 16",
-      "address_2": "",
-      "city": "Drongen",
-      "country_code": "be",
-      "province": "",
-      "postal_code": "9031",
-      "phone": "0032495248248",
-      "created_at": "2024-11-17T20:42:52.721Z",
-      "updated_at": "2024-11-17T20:42:52.721Z",
-      "deleted_at": null,
-      "metadata": null
-    },
-    "lineItems": [
-      {
-        "id": "item_01JCXXN7XKARBKX6DBNY0R38YK",
-        "cart_id": "cart_01JCXX9QWQFE4X5J2DK5D64F0K",
-        "order_id": null,
-        "swap_id": null,
-        "title": "No. 42 Chair",
-        "description": "Ash/Dark Blue",
-        "thumbnail": "https://imageproxy.designereditions.com/api/images/dfgbpib38/image/upload/e_trim/media/catalog/product/n/o/no._42_red_01_1.png",
-        "is_giftcard": false,
-        "should_merge": true,
-        "allow_discounts": true,
-        "has_shipping": true,
-        "unit_price": 23141,
-        "variant_id": "variant_01GPR3VQK05E72X8ZJW9FJSE7R",
-        "quantity": 6,
-        "fulfilled_quantity": null,
-        "returned_quantity": null,
-        "shipped_quantity": null,
-        "created_at": "2024-11-17T20:40:03.739Z",
-        "updated_at": "2024-11-17T22:06:02.723Z",
-        "metadata": {},
-        "claim_order_id": null,
-        "is_return": false
-      },
-      {
-        "id": "item_01JCY2HYYTAVD1P0XT0JM32HR9",
-        "cart_id": "cart_01JCXX9QWQFE4X5J2DK5D64F0K",
-        "order_id": null,
-        "swap_id": null,
-        "title": "CH20 Elbow Chair",
-        "description": "Black/Solid Oak",
-        "thumbnail": "https://imageproxy.designereditions.com/api/images/dfgbpib38/image/upload/e_trim/media/catalog/product/c/h/ch20_elbow_chair_ash_black_leather_04_1.png",
-        "is_giftcard": false,
-        "should_merge": true,
-        "allow_discounts": true,
-        "has_shipping": true,
-        "unit_price": 40392,
-        "variant_id": "variant_01GPR3WDX07JH7ECC3M5BA9W3T",
-        "quantity": 6,
-        "fulfilled_quantity": null,
-        "returned_quantity": null,
-        "shipped_quantity": null,
-        "created_at": "2024-11-17T22:05:39.133Z",
-        "updated_at": "2024-11-17T22:06:02.723Z",
-        "metadata": {},
-        "claim_order_id": null,
-        "is_return": false
-      }
-    ]
-  } | undefined>()
+  const [data, setData] = useState<AbadonedCart | undefined>()
   const [customer, setCustomer] = useState<{
     "id": "cus_01J27FX1VJPGPT8DYH94KB0PKS",
     "created_at": "2024-07-07T20:59:23.886Z",
@@ -514,6 +424,14 @@ const DetailsModal = ({ handleCancel, regions }) => {
         <Modal.Content>
           <div className="flex flex-col">
             <BodyCard className={"w-full mb-4 min-h-0 h-auto"} title="Summary">
+              <div className="">
+                <div className="font-bold">
+                  Reason:
+                </div>
+                {
+                  data.reason
+                }
+              </div>
               <div className="mt-6">
                 {data?.lineItems?.map((item, i) => (
                   <OrderLine key={i} item={item} currencyCode={currencyCode} />
