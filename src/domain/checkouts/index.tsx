@@ -102,8 +102,8 @@ const AbadonedCartsTable = ({ data }: {
         Cell: ({ cell: { value } }) => <div>{value}</div>,
       },
       {
-        Header: "Date added",
-        accessor: "created_at",
+        Header: "Last updated",
+        accessor: "updated_at",
         Cell: ({ cell: { value } }) => (
           <div>
             <Tooltip content={moment(value).format("DD MMM YYYY hh:mm a")}>
@@ -320,14 +320,14 @@ const OrderIndex = () => {
                 data: (data)
                   ?.sort((a, b) => {
                     return state
-                      ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-                      : -(new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+                      ? new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime()
+                      : -(new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime())
                   })
                   .filter((item) => {
                     if (!startDate || !endDate) return true
                     return (
-                      new Date(item.created_at) > new Date(startDate) &&
-                      new Date(item.created_at) < new Date(compareEndDate)
+                      new Date(item.updated_at) > new Date(startDate) &&
+                      new Date(item.updated_at) < new Date(compareEndDate)
                     )
                   }) || [],
               }}
