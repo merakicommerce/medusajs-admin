@@ -212,7 +212,7 @@ const AbadonedCartsTable = ({ data }: {
               return (
                 <Table.Row
                   color={"inherit"}
-                  linkTo={row.original.cart}
+                  linkTo={row.original.cart || row.original.id}
                   {...row.getRowProps()}
                   className="group"
                 >
@@ -231,7 +231,7 @@ const AbadonedCartsTable = ({ data }: {
     </TableContainer>
   )
 }
-const filter = (item: AbadonedCart) => Boolean(item.email) && item.lineItems?.length
+const filter = (item: AbadonedCart) => Boolean(item.email)
 const OrderIndex = () => {
   const view = "Abandoned Checkouts"
   const [data = [], setData] = useState<AbadonedCart[] | null>(cachedata)
@@ -424,14 +424,14 @@ const DetailsModal = ({ handleCancel, regions }) => {
         <Modal.Content>
           <div className="flex flex-col">
             <BodyCard className={"w-full mb-4 min-h-0 h-auto"} title="Summary">
-              <div className="">
+              {data?.reason && <div className="">
                 <div className="font-bold">
                   Reason:
                 </div>
                 {
-                  data.reason
+                  data?.reason
                 }
-              </div>
+              </div>}
               <div className="mt-6">
                 {data?.lineItems?.map((item, i) => (
                   <OrderLine key={i} item={item} currencyCode={currencyCode} />
@@ -478,8 +478,8 @@ const DetailsModal = ({ handleCancel, regions }) => {
               </div>
 
               {
-                data?.address && <div className="space-y-3 mt-6 border p-6">
-                  <div className="font-bold mb-6">Address</div>
+                data?.address && <div className="p-6 mt-6 space-y-3 border">
+                  <div className="mb-6 font-bold">Address</div>
                   {
                     Object.entries(data?.address).map(([key, value], i) => {
                       let igonreList = ['id', 'customer_id', 'created_at', 'updated_at', 'deleted_at', 'metadata']
