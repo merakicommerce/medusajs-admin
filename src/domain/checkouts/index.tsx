@@ -91,8 +91,8 @@ type AbadonedCart = {
   "payment_authorized_at": null
 }
 let cachedata: AbadonedCart[] = []
-const AbadonedCartsTable = ({ data }: {
-  data: AbadonedCart[]
+const AbadonedCartsTable = ({ data, regions }: {
+  data: AbadonedCart[], regions
 }) => {
   const columns = useMemo(
     () => [
@@ -122,6 +122,23 @@ const AbadonedCartsTable = ({ data }: {
         accessor: "email",
         Cell: ({ row, cell: { value } }) => <div>{value}</div>,
       },
+      {
+        Header: "Total",
+        Cell: ({ row }) => {
+          let items = row.original?.lineItems || []
+          let total = items.reduce((result, item) => {
+            result = result + item.quantity * item.unit_price
+            return result
+          }, 0)
+          let currencyCode = regions.find(reg => reg.id === row.original?.region_id)?.currency_code || "GBP"
+          return <DisplayTotal
+            variant="label"
+            currency={currencyCode}
+            totalAmount={total}
+            totalTitle={""}
+          />
+        }
+      }
     ],
     []
   )
@@ -232,7 +249,7 @@ const AbadonedCartsTable = ({ data }: {
   )
 }
 const filter = (item: AbadonedCart) => Boolean(item.email)
-const OrderIndex = () => {
+const OrderIndex = ({ regions }) => {
   const view = "Abandoned Checkouts"
   const [data = [], setData] = useState<AbadonedCart[] | null>(cachedata)
   useLayoutEffect(() => {
@@ -316,6 +333,7 @@ const OrderIndex = () => {
             </div>
             <AbadonedCartsTable
               key={String(state)}
+              regions={regions}
               {...{
                 data: (data)
                   ?.sort((a, b) => {
@@ -514,7 +532,7 @@ const Checkouts = () => {
 
   return (
     <div>
-      <OrderIndex />
+      <OrderIndex regions={regions} />
       <Routes>
         <Route
           path="/:id"
