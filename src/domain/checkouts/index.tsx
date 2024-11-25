@@ -130,7 +130,8 @@ const AbadonedCartsTable = ({ data, regions }: {
             result = result + item.quantity * item.unit_price
             return result
           }, 0)
-          let currencyCode = regions.find(reg => reg.id === row.original?.region_id)?.currency_code || "GBP"
+          if (!regions) return null
+          let currencyCode = regions?.find(reg => reg.id === row.original?.region_id)?.currency_code || "GBP"
           return <DisplayTotal
             variant="label"
             currency={currencyCode}
@@ -263,7 +264,7 @@ const OrderIndex = ({ regions }) => {
   const [startDate, setStartDate] = useState()
   const [endDate, setEndDate] = useState()
   const compareEndDate = moment(endDate).add("days", 1)
-
+  if (!regions) return null
   return (
     <>
       <div className="flex flex-col h-full grow">
@@ -532,7 +533,7 @@ const Checkouts = () => {
 
   return (
     <div>
-      <OrderIndex regions={regions} />
+      {<OrderIndex regions={regions} />}
       <Routes>
         <Route
           path="/:id"
