@@ -36,15 +36,16 @@ const OrderIndex = () => {
     try {
       notification("Loading", "Preparing export...", "info")
       
-      // Use the export_orders endpoint with cache parameter
-      const url = "/api/admin/export_orders?use_cache=true"
+      // Use the export_orders endpoint with no cache parameter since backend doesn't support it yet
+      const url = "/api/admin/export_orders"
       
       // Request the file directly as a blob for immediate download
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token'),
-          'Accept': 'text/csv'
+          // Request as blob but accept JSON as fallback for backward compatibility
+          'Accept': 'text/csv, application/json'
         }
       })
       
@@ -52,20 +53,92 @@ const OrderIndex = () => {
         throw new Error(`Export failed with status: ${response.status}`)
       }
       
-      // Get the blob directly from the response
-      const blob = await response.blob()
+      // Check content type to determine if it's CSV or JSON
+      const contentType = response.headers.get('content-type') || '';
       
-      // Create download link
-      const downloadUrl = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = downloadUrl
-      a.download = 'orders.csv'
-      document.body.appendChild(a)
-      a.click()
-      
-      // Cleanup
-      window.URL.revokeObjectURL(downloadUrl)
-      document.body.removeChild(a)
+      if (contentType.includes('text/csv')) {
+        // Backend is already returning CSV directly, use it
+        const blob = await response.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = 'orders.csv';
+        document.body.appendChild(a);
+        a.click();
+        
+        // Cleanup
+        window.URL.revokeObjectURL(downloadUrl);
+        document.body.removeChild(a);
+      } else {
+        // Backend is returning JSON, so we need to convert it to CSV in the browser
+        const data = await response.json();
+        
+        // Convert JSON to CSV
+        function jsonToCsv(json) {
+          if (!json || json.length === 0) {
+            return '';
+          }
+          
+          // Extract fields from the first item to use as headers
+          const fields = Object.keys(json[0]);
+          const replacer = (key, value) => value === null ? '' : value;
+          
+          // Create CSV rows
+          const csv = json.map(row => {
+            return fields.map(fieldName => {
+              return JSON.stringify(row[fieldName], replacer);
+            }).join(',');
+          });
+          
+          // Add header row
+          csv.unshift(fields.join(','));
+          return csv.join('\r\n');
+        }
+        
+        // Process the data with the existing mapping logic
+        let csv = jsonToCsv(data.map(item => {
+          return {
+            "ID": item.order.display_id,
+            "First Name": item.order?.address_order_shipping_address_idToaddress?.first_name,
+            "Last Name": item.order?.address_order_shipping_address_idToaddress?.last_name,
+            "Street": item.order?.address_order_shipping_address_idToaddress?.address_1 + ' ' + item.order?.address_order_shipping_address_idToaddress?.address_2,
+            "City": item.order?.address_order_shipping_address_idToaddress?.city,
+            "Country": item.order?.address_order_shipping_address_idToaddress?.country_code?.toUpperCase(),
+            "Product Name": item.title,
+            "Manufacturer": "",
+            "Email": item.order.email,
+            "Telephone": item.order?.address_order_shipping_address_idToaddress?.phone,
+            "Postcode": item.order?.address_order_shipping_address_idToaddress?.postal_code,
+            "SKU": item?.product_variant?.sku,
+            "Comment": item?.note?.value || '',
+            "Row Total": formatAmountWithSymbol({
+              amount: item.unit_price * item.quantity,
+              currency: item.order.currency_code,
+              tax: 0
+            }),
+            "Qty": item.quantity,
+            "Created At": (new Date(item.order.created_at)).toLocaleString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              second: 'numeric',
+              hour12: true
+            })
+          };
+        }));
+        
+        // Create and download the CSV file
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.setAttribute('download', 'orders.csv');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
       
       notification("Success", "Export completed successfully", "success")
     } catch (error) {
@@ -74,39 +147,9 @@ const OrderIndex = () => {
     }
   }
 
-  // Function to trigger cache generation in the background
-  const triggerCacheRefresh = async () => {
-    try {
-      const refreshUrl = "/api/admin/export_orders/refresh_cache"
-      await fetch(refreshUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
-        },
-        body: JSON.stringify({
-          context: contextFilters ? transformFiltersAsExportContext(contextFilters) : {}
-        })
-      })
-      // No need to wait for completion or show notification
-    } catch (error) {
-      console.error("Cache refresh failed:", error)
-      // Silent failure - doesn't affect the user experience
-    }
-  }
-
-  // Combine both actions: immediate download and background refresh
-  const handleExportWithCache = async () => {
-    // First download the current cached version
-    await handleDownloadOrdersCsv()
-    
-    // Then trigger a background refresh for next time
-    triggerCacheRefresh()
-  }
-
   const actions = useMemo(() => {
     return [
-      <Button size="small" variant="secondary" onClick={handleExportWithCache}
+      <Button size="small" variant="secondary" onClick={handleDownloadOrdersCsv}
       ><span className="mr-xsmall last:mr-0"><svg width={20} height={20} viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 13V15.6667C17.5 16.0203 17.3361 16.3594 17.0444 16.6095C16.7527 16.8595 16.357 17 15.9444 17H5.05556C4.643 17 4.24733 16.8595 3.95561 16.6095C3.66389 16.3594 3.5 16.0203 3.5 15.6667V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M14.6673 6.92057L10.5007 2.75391L6.33398 6.92057" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M10.5 2.75391V12.7539" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></span><span className="mr-xsmall last:mr-0">Export Orders</span></Button>
       ,
     ]

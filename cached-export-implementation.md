@@ -4,6 +4,199 @@
 
 This document outlines the implementation of a cached export system for the `/api/admin/export_orders` endpoint to provide immediate file delivery, even with large datasets.
 
+## Current Status
+
+- ✅ Frontend has been updated to handle both CSV and JSON responses
+- ❌ Backend endpoints for caching need to be implemented
+
+## Implementation Steps
+
+### 1. Frontend Implementation (Already Done)
+
+The frontend has been modified to:
+1. Request the file directly as a binary blob
+2. Handle both CSV and JSON responses from the backend:
+   - If CSV is returned, it downloads it directly
+   - If JSON is returned, it converts to CSV in the browser (original behavior)
+
+### 2. Backend Implementation Requirements
+
+#### Step 1: Modify Export Orders Endpoint
+
+Update the `/api/admin/export_orders` endpoint in your Medusa backend to support direct CSV generation:
+
+```javascript
+// Example implementation (Express.js)
+router.get('/admin/export_orders', async (req, res) => {
+  try {
+    const useCache = req.query.use_cache === 'true';
+    
+    // Get content type from Accept header to determine response format
+    const acceptsCsv = req.get('Accept').includes('text/csv');
+    
+    // Check if we should try to use the cache
+    if (useCache && acceptsCsv) {
+      const cacheExists = await checkCacheExists();
+      
+      if (cacheExists) {
+        // Set appropriate headers for CSV
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="orders.csv"');
+        
+        // Stream the file directly from cache
+        const fileStream = fs.createReadStream(getCachePath());
+        return fileStream.pipe(res);
+      }
+    }
+    
+    // If client requests CSV but no cache is available
+    if (acceptsCsv) {
+      // Generate CSV directly
+      const csvContent = await generateOrdersCsv(req.query);
+      
+      // Save to cache if requested
+      if (useCache) {
+        await saveToCacheIfNeeded(csvContent);
+      }
+      
+      // Return the generated CSV
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="orders.csv"');
+      return res.send(csvContent);
+    }
+    
+    // If client does not specifically request CSV, return JSON (original behavior)
+    const orders = await fetchOrders(req.query);
+    return res.json(orders);
+  } catch (error) {
+    console.error('Export error:', error);
+    res.status(500).json({ error: 'Export failed' });
+  }
+});
+```
+
+#### Step 2: Implement CSV Generation Function
+
+Add a function to your backend to generate CSV directly without going through JSON:
+
+```javascript
+/**
+ * Generate CSV directly from database data
+ */
+async function generateOrdersCsv(filters = {}) {
+  // Create CSV writer
+  const csvWriter = createCsvWriter({
+    // Define CSV structure with headers
+    header: [
+      {id: 'id', title: 'ID'},
+      {id: 'firstName', title: 'First Name'},
+      {id: 'lastName', title: 'Last Name'},
+      // ...add all the fields you need
+    ]
+  });
+  
+  // Fetch orders with pagination to avoid memory issues
+  let allRecords = [];
+  let hasMore = true;
+  let page = 0;
+  const pageSize = 100;
+  
+  while (hasMore) {
+    const orders = await fetchOrdersPage(filters, page, pageSize);
+    
+    if (orders.length === 0) {
+      hasMore = false;
+      break;
+    }
+    
+    // Transform orders into CSV format
+    const records = orders.flatMap(order => {
+      return order.items.map(item => ({
+        id: order.display_id,
+        firstName: order.shipping_address?.first_name,
+        lastName: order.shipping_address?.last_name,
+        // ...map all fields
+      }));
+    });
+    
+    allRecords = [...allRecords, ...records];
+    page++;
+    
+    // Safety limit
+    if (page > 100) hasMore = false;
+  }
+  
+  // Generate CSV string
+  return csvWriter.writeRecords(allRecords);
+}
+```
+
+#### Step 3: Add Cache Refresh Endpoint (Optional)
+
+Once the initial implementation is tested, add the refresh endpoint:
+
+```javascript
+router.post('/admin/export_orders/refresh_cache', async (req, res) => {
+  try {
+    // Start the refresh in the background
+    const job = await startCacheRefreshJob(req.body.context);
+    
+    // Return immediately
+    res.json({ success: true, job_id: job.id });
+  } catch (error) {
+    console.error('Cache refresh error:', error);
+    res.status(500).json({ error: 'Cache refresh failed' });
+  }
+});
+```
+
+### 3. Deployment Instructions
+
+1. **Update Frontend**:
+   - Deploy the updated frontend code with the changes to `handleDownloadOrdersCsv`
+   
+2. **Update Backend**:
+   - Modify the `/api/admin/export_orders` endpoint to support direct CSV generation
+   - Add support for the `Accept: text/csv` header
+   - Test locally first to ensure proper functionality
+   
+3. **Implement Caching (Phase 2)**:
+   - After the direct CSV export is working, add the caching mechanism
+   - Add the `/api/admin/export_orders/refresh_cache` endpoint
+   - Update the frontend to use the cached version
+
+### 4. Testing Checklist
+
+- [ ] Export button works and shows loading indicator
+- [ ] CSV is generated correctly with all required fields
+- [ ] Large datasets are handled efficiently
+- [ ] Error handling displays appropriate messages
+- [ ] (If caching implemented) Cache is refreshed as expected
+
+## Troubleshooting
+
+### Common Issues
+
+1. **404 Not Found for /refresh_cache endpoint**
+   - This endpoint needs to be implemented on the backend
+   - Use the original export function until the endpoint is implemented
+
+2. **CSV Generation Memory Issues**
+   - Use pagination when fetching orders from the database
+   - Implement streaming response instead of loading everything into memory
+
+3. **Slow CSV Generation**
+   - Add indexes to frequently filtered fields in the database
+   - Cache results for common filter combinations
+   - Consider background processing for large exports
+
+## Next Steps After Initial Implementation
+
+1. Implement the caching mechanism
+2. Add metrics for cache hits/misses
+3. Implement automated cache refresh on data changes
+4. Add support for filtered exports with caching
+
 ## Frontend Implementation
 
 The frontend has been modified to:
