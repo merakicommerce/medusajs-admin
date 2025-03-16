@@ -33,26 +33,48 @@ export const prepareImages = async (images: FormImage[]) => {
   return [...existingImages, ...uploadedImgs]
 }
 
+export const repalceImage = (src: string | null | undefined) => {
+  if (!src || typeof src !== 'string') {
+    return null;
+  }
+  return src.replace(
+    "res.cloudinary.com",
+    "imageproxy.mobelaris.com/api/images"
+  );
+}
 
-export const repalceImage = (src: string) => src.replace(
-  "res.cloudinary.com",
-  "imageproxy.mobelaris.com/api/images"
-)
 export const getVariantImage = (variant: ProductVariant) => {
+  // Type guard to check if metadata has images array
+  const hasImages = variant.metadata && 
+    typeof variant.metadata === 'object' && 
+    'images' in variant.metadata && 
+    Array.isArray((variant.metadata as any).images) && 
+    (variant.metadata as any).images.length > 0;
 
-
-  if (variant.metadata?.images.length > 0) {
+  if (hasImages) {
     return variant.product.images[0]
   }
 
   return null
 }
-export const getOrderLineItemImage = (item: LineItem) => {
-  let variant = item.variant
 
-  if (variant?.metadata?.images.length > 0) {
-    return repalceImage(variant.metadata.images[0]).replace("/image/upload/e_trim/", `/image/upload/e_trim,w_100/`)
+export const getOrderLineItemImage = (item: LineItem) => {
+  let variant = item.variant;
+
+  // Type guard to check if metadata has images array
+  const hasImages = variant?.metadata && 
+    typeof variant.metadata === 'object' && 
+    'images' in variant.metadata && 
+    Array.isArray((variant.metadata as any).images) && 
+    (variant.metadata as any).images.length > 0;
+
+  if (hasImages) {
+    const imageUrl = (variant.metadata as any).images[0];
+    if (typeof imageUrl === 'string') {
+      const replacedImage = repalceImage(imageUrl);
+      return replacedImage ? replacedImage.replace("/image/upload/e_trim/", `/image/upload/e_trim,w_100/`) : null;
+    }
   }
 
-  return item.thumbnail
+  return item.thumbnail;
 }
