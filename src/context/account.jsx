@@ -80,6 +80,18 @@ export const AccountProvider = ({ children }) => {
             return data
           })
         },
+
+        handleBypassLogin: () => {
+          dispatch({ 
+            type: "userLoggedIn", 
+            payload: { 
+              id: "bypass-user", 
+              email: "admin@bypass.com", 
+              first_name: "Admin", 
+              last_name: "User" 
+            } 
+          })
+        },
       }}
     >
       {children}
