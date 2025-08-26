@@ -57,7 +57,7 @@ const EditIMetadataProductForm = ({ form }: Props) => {
             label={config.label}
             name={`metadata.${fieldId}`}
             value={currentValue}
-            onChange={(value) => setValue(`metadata.${fieldId}` as any, value)}
+            onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
             placeholder={`Enter ${config.label.toLowerCase()}...`}
             errors={errors}
           />
@@ -70,7 +70,7 @@ const EditIMetadataProductForm = ({ form }: Props) => {
             label={config.label}
             name={`metadata.${fieldId}`}
             value={currentValue}
-            onChange={(value) => setValue(`metadata.${fieldId}` as any, value)}
+            onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
             errors={errors}
           />
         )
