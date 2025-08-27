@@ -1,5 +1,5 @@
 import {
-  AdminPostProductsProductVariantsVariantReq,
+  AdminPostProductsProductReq,
   Product,
 } from "@medusajs/medusa"
 import { useForm } from "react-hook-form"
@@ -17,7 +17,7 @@ type Props = {
 }
 export const createUpdatePayload = (
   data: EditMetadataProductFormType
-): AdminPostProductsProductVariantsVariantReq => {
+): Partial<AdminPostProductsProductReq> => {
   const { metadata } = data
   return {
     metadata,
