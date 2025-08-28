@@ -1,5 +1,5 @@
 import axios from "axios"
-import { medusaUrl, MEDUSA_BACKEND_URL } from "./config"
+import { medusaUrl, VITE_MEDUSA_BACKEND_URL } from "./config"
 
 const client = axios.create({ baseURL: medusaUrl })
 
@@ -15,9 +15,9 @@ export default function medusaRequest(method, path = "", payload = {}) {
 }
 
 export function backendRequest(path) {
-  const fullUrl = MEDUSA_BACKEND_URL + path
+  const fullUrl = VITE_MEDUSA_BACKEND_URL + path
   console.log("🐛 DEBUG - backendRequest:")
-  console.log("  MEDUSA_BACKEND_URL:", MEDUSA_BACKEND_URL)
+  console.log("  VITE_MEDUSA_BACKEND_URL:", VITE_MEDUSA_BACKEND_URL)
   console.log("  path:", path)
   console.log("  fullUrl:", fullUrl)
   

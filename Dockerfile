@@ -14,18 +14,18 @@ RUN yarn install --frozen-lockfile
 COPY . .
 
 # Set build-time environment variables
-ARG MEDUSA_BACKEND_URL
+ARG VITE_MEDUSA_BACKEND_URL
 ARG VITE_FEED_URL  
 ARG VITE_FRONT_ADMIN_URL
 
 # Make build args available as environment variables
-ENV MEDUSA_BACKEND_URL=$MEDUSA_BACKEND_URL
+ENV VITE_MEDUSA_BACKEND_URL=$VITE_MEDUSA_BACKEND_URL
 ENV VITE_FEED_URL=$VITE_FEED_URL
 ENV VITE_FRONT_ADMIN_URL=$VITE_FRONT_ADMIN_URL
 
 # Debug: Show environment variables during build
 RUN echo "🐛 Build-time environment variables:" && \
-    echo "MEDUSA_BACKEND_URL=$MEDUSA_BACKEND_URL" && \
+    echo "VITE_MEDUSA_BACKEND_URL=$VITE_MEDUSA_BACKEND_URL" && \
     echo "VITE_FEED_URL=$VITE_FEED_URL" && \
     echo "VITE_FRONT_ADMIN_URL=$VITE_FRONT_ADMIN_URL"
 
