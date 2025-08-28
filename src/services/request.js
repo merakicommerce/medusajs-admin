@@ -26,5 +26,22 @@ export function backendRequest(path) {
       "x-medusa-access-token": "12345678900",
       "Authorization": "Bearer 12345678900"
     },
+  }).then(async (response) => {
+    console.log("🐛 DEBUG - Response status:", response.status)
+    console.log("🐛 DEBUG - Response headers:", Object.fromEntries(response.headers.entries()))
+    
+    const responseText = await response.text()
+    console.log("🐛 DEBUG - Response body (first 500 chars):", responseText.slice(0, 500))
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${responseText}`)
+    }
+    
+    try {
+      return JSON.parse(responseText)
+    } catch (e) {
+      console.error("🐛 DEBUG - Failed to parse JSON:", e)
+      throw new Error(`Invalid JSON response: ${responseText.slice(0, 100)}`)
+    }
   })
 }
