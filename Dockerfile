@@ -13,6 +13,16 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
+# Set build-time environment variables
+ARG VITE_MEDUSA_BACKEND_URL
+ARG VITE_FEED_URL  
+ARG VITE_FRONT_ADMIN_URL
+
+# Make build args available as environment variables
+ENV VITE_MEDUSA_BACKEND_URL=$VITE_MEDUSA_BACKEND_URL
+ENV VITE_FEED_URL=$VITE_FEED_URL
+ENV VITE_FRONT_ADMIN_URL=$VITE_FRONT_ADMIN_URL
+
 # Build the application
 RUN yarn build
 
