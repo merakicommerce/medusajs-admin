@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  medusa-admin:
+    build:
+      context: .
+      args:
+        VITE_MEDUSA_BACKEND_URL: ${VITE_MEDUSA_BACKEND_URL}
+        VITE_FEED_URL: ${VITE_FEED_URL}
+        VITE_FRONT_ADMIN_URL: ${VITE_FRONT_ADMIN_URL}
+    ports:
+      - "7000:7000"
+    environment:
+      - NODE_ENV=production

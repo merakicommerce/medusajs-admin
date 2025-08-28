@@ -254,7 +254,15 @@ const OrderIndex = ({ regions }) => {
   const view = "Abandoned Checkouts"
   const [data = [], setData] = useState<AbadonedCart[] | null>(cachedata)
   useLayoutEffect(() => {
+    // Debug environment variables
+    console.log("🐛 DEBUG - Environment Variables:")
+    console.log("VITE_MEDUSA_BACKEND_URL:", import.meta.env.VITE_MEDUSA_BACKEND_URL)
+    console.log("VITE_FEED_URL:", import.meta.env.VITE_FEED_URL)
+    console.log("VITE_FRONT_ADMIN_URL:", import.meta.env.VITE_FRONT_ADMIN_URL)
+    console.log("All env vars:", import.meta.env)
+    
     Medusa.abadonedCarts.list().then((res) => {
+      console.log("🐛 DEBUG - Abandoned carts API response:", res)
       // Add index to each item for table display and ensure proper structure
       const dataWithIndex = res.map((item, index) => ({ 
         ...item, 
@@ -265,7 +273,9 @@ const OrderIndex = ({ regions }) => {
       cachedata = dataWithIndex.filter(filter)
       setData(cachedata)
     }).catch((error) => {
-      console.error("Failed to fetch abandoned carts:", error)
+      console.error("🐛 DEBUG - Failed to fetch abandoned carts. Full error:", error)
+      console.error("🐛 DEBUG - Error message:", error.message)
+      console.error("🐛 DEBUG - Error stack:", error.stack)
       setData([])
     })
   }, [])
