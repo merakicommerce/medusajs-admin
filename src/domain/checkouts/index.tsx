@@ -256,6 +256,7 @@ const OrderIndex = ({ regions }) => {
   useLayoutEffect(() => {
     // Debug environment variables
     console.log("🐛 DEBUG - Environment Variables:")
+    console.log("MEDUSA_BACKEND_URL:", import.meta.env.MEDUSA_BACKEND_URL)
     console.log("VITE_MEDUSA_BACKEND_URL:", import.meta.env.VITE_MEDUSA_BACKEND_URL)
     console.log("VITE_FEED_URL:", import.meta.env.VITE_FEED_URL)
     console.log("VITE_FRONT_ADMIN_URL:", import.meta.env.VITE_FRONT_ADMIN_URL)
