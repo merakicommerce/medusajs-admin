@@ -1,4 +1,4 @@
-import medusaRequest, {backendRequest} from "./request"
+import medusaRequest, {backendRequest, directBackendRequest} from "./request"
 
 const removeNullish = (obj) =>
   Object.entries(obj).reduce((a, [k, v]) => (v ? ((a[k] = v), a) : a), {})
@@ -15,26 +15,35 @@ const buildQueryFromObject = (search, prefix = "") =>
 export default {
   abadonedCarts: {
     list() {
-      // Try custom endpoint first, fallback to standard carts endpoint
-      const path = `/admin/abandon_cart/all`
-      console.log("🐛 DEBUG - Trying abandoned carts endpoint:", path)
-      return backendRequest(path).catch((error) => {
-        console.log("🐛 DEBUG - Custom endpoint failed, trying standard carts endpoint")
-        console.log("🐛 DEBUG - Custom endpoint error:", error.message)
-        // Fallback to standard Medusa carts endpoint for abandoned carts
-        const fallbackPath = `/admin/carts?limit=50&offset=0&completed_at=null`
-        return medusaRequest("GET", fallbackPath).then((res) => res.data.carts || [])
-      })
+      console.log("🐛 DEBUG - Fetching abandoned carts using direct backend request...")
+      
+      // Use the direct backend request that matches your working curl command
+      return directBackendRequest("/admin/abandon_cart/all")
+        .then((data) => {
+          console.log("🐛 DEBUG - Direct backend response:", data)
+          return data || []
+        })
+        .catch((error) => {
+          console.log("🐛 DEBUG - Custom endpoint failed, error:", error.message)
+          
+          // If the custom endpoint fails, return empty array for now
+          // (You could implement a fallback to standard Medusa API here if needed)
+          console.log("🐛 DEBUG - Returning empty array due to API failure")
+          return []
+        })
     },
     retrieve(cartid) {
-      const path = `/admin/abandon_cart/${cartid}`
-      console.log("🐛 DEBUG - Retrieving abandoned cart:", cartid)
-      return backendRequest(path).catch((error) => {
-        console.log("🐛 DEBUG - Custom retrieve failed, trying standard cart endpoint")
-        // Fallback to standard cart endpoint  
-        const fallbackPath = `/admin/carts/${cartid}`
-        return medusaRequest("GET", fallbackPath).then((res) => res.data.cart)
-      })
+      console.log("🐛 DEBUG - Retrieving abandoned cart using direct backend:", cartid)
+      
+      return directBackendRequest(`/admin/abandon_cart/${cartid}`)
+        .then((data) => {
+          console.log("🐛 DEBUG - Direct cart retrieve response:", data)
+          return data
+        })
+        .catch((error) => {
+          console.log("🐛 DEBUG - Direct cart retrieve failed:", error.message)
+          return null
+        })
     },
   },
   returnReasons: {

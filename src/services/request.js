@@ -22,10 +22,13 @@ export function backendRequest(path) {
   console.log("  fullUrl:", fullUrl)
   
   return fetch(fullUrl, {
+    method: 'GET',
     headers: {
-      "x-medusa-access-token": "12345678900",
-      "Authorization": "Bearer 12345678900"
+      "Authorization": "Bearer 12345678900",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
     },
+    credentials: 'include'
   }).then(async (response) => {
     console.log("🐛 DEBUG - Response status:", response.status)
     console.log("🐛 DEBUG - Response headers:", Object.fromEntries(response.headers.entries()))
@@ -43,5 +46,31 @@ export function backendRequest(path) {
       console.error("🐛 DEBUG - Failed to parse JSON:", e)
       throw new Error(`Invalid JSON response: ${responseText.slice(0, 100)}`)
     }
+  })
+}
+
+// Create a direct backend request for abandoned carts that matches your working curl
+export function directBackendRequest(path) {
+  const fullUrl = VITE_MEDUSA_BACKEND_URL + path
+  console.log("🐛 DEBUG - directBackendRequest:")
+  console.log("  fullUrl:", fullUrl)
+  
+  return fetch(fullUrl, {
+    method: 'GET',
+    headers: {
+      "Authorization": "Bearer 12345678900"
+    }
+  }).then(async (response) => {
+    console.log("🐛 DEBUG - Direct response status:", response.status)
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.log("🐛 DEBUG - Direct response error:", errorText)
+      throw new Error(`HTTP ${response.status}: ${errorText}`)
+    }
+    
+    const data = await response.json()
+    console.log("🐛 DEBUG - Direct response data:", data)
+    return data
   })
 }
