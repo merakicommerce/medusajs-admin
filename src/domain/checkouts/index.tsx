@@ -255,8 +255,18 @@ const OrderIndex = ({ regions }) => {
   const [data = [], setData] = useState<AbadonedCart[] | null>(cachedata)
   useLayoutEffect(() => {
     Medusa.abadonedCarts.list().then((res) => {
-      cachedata = res.filter(filter)
+      // Add index to each item for table display and ensure proper structure
+      const dataWithIndex = res.map((item, index) => ({ 
+        ...item, 
+        index: index + 1,
+        // Set region_id from nested region object for compatibility
+        region_id: item.region?.id || item.region_id
+      }))
+      cachedata = dataWithIndex.filter(filter)
       setData(cachedata)
+    }).catch((error) => {
+      console.error("Failed to fetch abandoned carts:", error)
+      setData([])
     })
   }, [])
   const navigate = useNavigate()
@@ -289,8 +299,18 @@ const OrderIndex = ({ regions }) => {
                 onClick() {
                   setData(null)
                   Medusa.abadonedCarts.list().then((res) => {
-                    cachedata = res.filter(filter)
+                    // Add index to each item for table display and ensure proper structure
+                    const dataWithIndex = res.map((item, index) => ({ 
+                      ...item, 
+                      index: index + 1,
+                      // Set region_id from nested region object for compatibility
+                      region_id: item.region?.id || item.region_id
+                    }))
+                    cachedata = dataWithIndex.filter(filter)
                     setData(cachedata)
+                  }).catch((error) => {
+                    console.error("Failed to refresh abandoned carts:", error)
+                    setData([])
                   })
                 },
               },
@@ -407,6 +427,9 @@ const DetailsModal = ({ handleCancel, regions }) => {
   useLayoutEffect(() => {
     Medusa.abadonedCarts.retrieve(id).then((res) => {
       setData(res)
+    }).catch((error) => {
+      console.error("Failed to fetch abandoned cart details:", error)
+      setData(null)
     })
   }, [id])
   useLayoutEffect(() => {

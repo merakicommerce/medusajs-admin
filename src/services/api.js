@@ -15,7 +15,7 @@ const buildQueryFromObject = (search, prefix = "") =>
 export default {
   abadonedCarts: {
     list() {
-      const path = `/admin/abandon_cart`
+      const path = `/admin/abandon_cart/all`
       return backendRequest(path).then((res) => res.json())
     },
     retrieve(cartid) {
