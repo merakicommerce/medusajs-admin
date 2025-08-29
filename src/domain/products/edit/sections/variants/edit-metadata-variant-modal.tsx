@@ -105,6 +105,8 @@ export const getEditIMetadataVariantDefaultValues = (
     in_stock,
     leadtime,
     material,
+    description,
+    product_information,
     dimension_image,
     heading_1,
     heading_2,
@@ -116,6 +118,8 @@ export const getEditIMetadataVariantDefaultValues = (
     in_stock: boolean | string
     leadtime: string
     material: string
+    description: string
+    product_information: string
     heading_1: string
     heading_2: string
     dimension_image: string
@@ -129,6 +133,8 @@ export const getEditIMetadataVariantDefaultValues = (
       in_stock: in_stock || false,
       leadtime,
       material,
+      description,
+      product_information,
       heading_1,
       dimension_image,
       heading_2,

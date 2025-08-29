@@ -4,6 +4,7 @@ import RichTextField from "../../../../../components/molecules/rich-text-field"
 import BooleanField from "../../../../../components/molecules/boolean-field"
 import ImageArrayField from "../../../../../components/molecules/image-array-field"
 import CompactImageField from "../../../../../components/molecules/compact-image-field"
+import KeyValueField from "../../../../../components/molecules/key-value-field"
 import { type ImageData, type ImageMetadata } from "../../../../../utils/image-metadata-utils"
 
 interface Metadata {
@@ -11,6 +12,8 @@ interface Metadata {
   in_stock: boolean | string
   leadtime: string
   material: string
+  description: string
+  product_information: string
   heading_1: string
   heading_2: string
   dimension_image: ImageMetadata
@@ -29,6 +32,8 @@ const fieldConfig = {
   in_stock: { type: 'boolean', label: 'In Stock', section: 'basic' },
   leadtime: { type: 'text', label: 'Lead Time', section: 'basic' },
   material: { type: 'text', label: 'Material', section: 'basic' },
+  description: { type: 'key-value', label: 'Description', section: 'content' },
+  product_information: { type: 'key-value', label: 'Product Information', section: 'content' },
   heading_1: { type: 'richtext', label: 'Heading 1', section: 'content' },
   heading_2: { type: 'richtext', label: 'Heading 2', section: 'content' },
   dimension_image: { type: 'image', label: 'Dimension Image', section: 'images' },
@@ -65,6 +70,37 @@ const EditIMetadataVariantForm = ({ form }: Props) => {
             value={currentValue}
             onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
             placeholder={`Enter ${config.label.toLowerCase()}...`}
+            errors={errors}
+          />
+        )
+      
+      case 'key-value':
+        const placeholder = fieldId === 'description' 
+          ? `Enter description...
+
+For structured data, use format:
+Top: Brushed Brass
+Base: White Marble
+Style: Modern Classic
+Warranty: 5 Years`
+          : fieldId === 'product_information'
+          ? `Enter product information...
+
+For structured data, use format:
+Material: Premium Oak Wood
+Dimensions: 120cm x 80cm x 75cm
+Weight: 25kg
+Color: Natural Oak`
+          : `Enter ${config.label.toLowerCase()}...`
+        
+        return (
+          <KeyValueField
+            key={fieldId}
+            label={config.label}
+            name={`metadata.${fieldId}`}
+            value={currentValue}
+            onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
+            placeholder={placeholder}
             errors={errors}
           />
         )
