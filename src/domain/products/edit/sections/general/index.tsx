@@ -12,6 +12,7 @@ import Section from "../../../../../components/organisms/section"
 import { useFeatureFlag } from "../../../../../context/feature-flag"
 import useToggleState from "../../../../../hooks/use-toggle-state"
 import useEditProductActions from "../../hooks/use-edit-product-actions"
+import EditableProductForm from "../../components/editable-product-form"
 import EditIMetadataProductModal from "../metadata/metadata-modal"
 import ChannelsModal from "./channels-modal"
 import GeneralModal from "./general-modal"
@@ -79,12 +80,14 @@ const GeneralSection = ({ product }: Props) => {
           />
         }
       >
-        <p className="mt-2 whitespace-pre-wrap inter-base-regular text-grey-50">
-          {product.description}
-        </p>
-        <ProductTags product={product} />
-        <ProductDetails product={product} />
-        <ProductSalesChannels product={product} />
+        <div className="mt-4">
+          <EditableProductForm product={product} />
+        </div>
+        <div className="mt-6">
+          <ProductTags product={product} />
+          <ProductDetails product={product} />
+          <ProductSalesChannels product={product} />
+        </div>
       </Section>
 
       <GeneralModal product={product} open={infoState} onClose={closeInfo} />

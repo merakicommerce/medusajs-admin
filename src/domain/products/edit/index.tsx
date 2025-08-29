@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router-dom"
 import BackButton from "../../../components/atoms/back-button"
 import Spinner from "../../../components/atoms/spinner"
 import { getErrorStatus } from "../../../utils/get-error-status"
-import AttributesSection from "./sections/attributes"
 import GeneralSection from "./sections/general"
 import MediaSection from "./sections/media"
 import RawSection from "./sections/raw"
@@ -55,7 +54,6 @@ const Edit = () => {
         <div className="col-span-8 flex flex-col gap-y-xsmall">
           <GeneralSection product={product} />
           <VariantsSection product={product} />
-          <AttributesSection product={product} />
           <RawSection product={product} />
         </div>
         <div className="flex flex-col col-span-4 gap-y-xsmall">
