@@ -18,6 +18,7 @@ interface Metadata {
   description_image_2: ImageMetadata
   images: ImageData[] | string[] | string
   // SEO fields
+  handle: string
   meta_title: string
   meta_keyword: string
   meta_description: string

@@ -14,6 +14,7 @@ type Props = {
 }
 
 type SEOFormData = {
+  handle: string
   meta_title: string
   meta_keyword: string
   meta_description: string
@@ -33,6 +34,7 @@ const EditSEOVariantModal = ({ variant, product, onClose }: Props) => {
 
   const form = useForm<SEOFormData>({
     defaultValues: {
+      handle: variantMetadata.handle || product.handle || '',
       meta_title: variantMetadata.meta_title || productMetadata.meta_title || '',
       meta_keyword: variantMetadata.meta_keyword || productMetadata.meta_keyword || '',
       meta_description: variantMetadata.meta_description || productMetadata.meta_description || '',
@@ -50,6 +52,7 @@ const EditSEOVariantModal = ({ variant, product, onClose }: Props) => {
   // Reset form when variant changes
   useEffect(() => {
     reset({
+      handle: variantMetadata.handle || product.handle || '',
       meta_title: variantMetadata.meta_title || productMetadata.meta_title || '',
       meta_keyword: variantMetadata.meta_keyword || productMetadata.meta_keyword || '',
       meta_description: variantMetadata.meta_description || productMetadata.meta_description || '',
@@ -64,6 +67,7 @@ const EditSEOVariantModal = ({ variant, product, onClose }: Props) => {
   const onSubmit = handleSubmit((data) => {
     const updatedMetadata = {
       ...variantMetadata,
+      handle: data.handle,
       meta_title: data.meta_title,
       meta_keyword: data.meta_keyword,
       meta_description: data.meta_description,
@@ -96,12 +100,9 @@ const EditSEOVariantModal = ({ variant, product, onClose }: Props) => {
             <div className="mb-8 p-4 bg-grey-5 border border-grey-20 rounded-rounded">
               <h3 className="text-sm font-medium text-grey-90 mb-3">Search engine listing preview</h3>
               <div className="bg-white p-4 rounded border">
-                {/* Site name and URL */}
-                <div className="text-sm text-green-600 mb-1">
-                  <span>Mobelaris</span>
-                </div>
+                {/* URL only */}
                 <div className="text-xs text-grey-50 mb-2">
-                  {import.meta.env.VITE_SITE_URL || 'https://www.mobelaris.com'} › products › {product.handle} › {variant.title?.toLowerCase().replace(/\s+/g, '-') || 'variant'}
+                  {import.meta.env.VITE_SITE_URL || 'https://www.mobelaris.com'}/en/{watch("handle") || product.handle || 'product-handle'}
                 </div>
                 
                 {/* Title */}
@@ -114,15 +115,38 @@ const EditSEOVariantModal = ({ variant, product, onClose }: Props) => {
                   {watch("meta_description") || product.description || "Product description will appear here. Add a meta description to control how this variant appears in search results."}
                 </div>
                 
-                {/* Price placeholder */}
-                <div className="text-sm text-grey-90 mt-2 font-medium">
-                  From £{((variant.prices?.[0]?.amount || 0) / 100).toFixed(2)} GBP
+                {/* Price and Stock */}
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="text-sm text-grey-90 font-medium">
+                    £{((variant.prices?.[0]?.amount || 0) / 100).toFixed(2)}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-grey-70">In stock</span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* SEO Fields */}
             <div className="space-y-4">
+              <div>
+                <InputField
+                  label="Handle"
+                  {...register("handle")}
+                  placeholder="product-url-slug"
+                  errors={errors}
+                />
+                <p className="text-xs text-grey-50 mt-1">
+                  URL slug for this variant (use lowercase letters and hyphens)
+                </p>
+                {!variantMetadata.handle && product.handle && (
+                  <p className="text-xs text-grey-50 mt-1">
+                    <span className="text-violet-60">Inheriting from product:</span> {product.handle}
+                  </p>
+                )}
+              </div>
+
               <div>
                 <InputField
                   label="Meta Title"
