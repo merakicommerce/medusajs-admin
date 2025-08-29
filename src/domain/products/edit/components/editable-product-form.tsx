@@ -11,6 +11,7 @@ import ImageArrayField from '../../../../components/molecules/image-array-field'
 import CompactImageField from '../../../../components/molecules/compact-image-field'
 import useNotification from '../../../../hooks/use-notification'
 import useEditProductActions from '../hooks/use-edit-product-actions'
+import { normalizeImageData, createImageData, type ImageData, type ImageMetadata } from '../../../../utils/image-metadata-utils'
 
 type EditableProductFormData = {
   title: string
@@ -32,13 +33,13 @@ type EditableProductFormData = {
     product_type: string
     description_1: string
     description_2: string
-    dimension_image: string
+    dimension_image: ImageMetadata
     magento_product_id: string
     product_information: string
     inspiredOfInformation: string
     google_product_category: string
     in_stock: boolean | string
-    images: string[] | string
+    images: ImageData[] | string[] | string
     // SEO fields
     meta_title: string
     meta_keyword: string

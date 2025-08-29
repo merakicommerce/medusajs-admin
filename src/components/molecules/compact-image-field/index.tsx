@@ -6,12 +6,14 @@ import Button from '../../fundamentals/button'
 import TrashIcon from '../../fundamentals/icons/trash-icon'
 import EditIcon from '../../fundamentals/icons/edit-icon'
 import Spinner from '../../atoms/spinner'
+import InputField from '../input'
+import { normalizeImageData, createImageData, type ImageMetadata, type ImageData } from '../../../utils/image-metadata-utils'
 
 type CompactImageFieldProps = {
   label: string
   name: string
-  value?: string
-  onChange: (value: string) => void
+  value?: ImageMetadata
+  onChange: (value: ImageData | string) => void
   onBlur?: () => void
   required?: boolean
   errors?: { [x: string]: unknown }
@@ -21,7 +23,7 @@ type CompactImageFieldProps = {
 const CompactImageField: React.FC<CompactImageFieldProps> = ({
   label,
   name,
-  value = '',
+  value,
   onChange,
   onBlur,
   required = false,
@@ -30,7 +32,13 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
 }) => {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
+  const [showAltText, setShowAltText] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  
+  // Normalize the current value
+  const imageData = normalizeImageData(value || '')
+  const currentUrl = imageData?.url || ''
+  const currentAlt = imageData?.alt || ''
 
   // Direct Cloudinary upload function without widget
   const uploadToCloudinary = async (file: File): Promise<string> => {
@@ -78,7 +86,9 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
     try {
       const imageUrl = await uploadToCloudinary(file)
       console.log('🐛 DEBUG - Image uploaded successfully:', imageUrl)
-      onChange(imageUrl)
+      // Preserve existing alt text or create new image data
+      const newImageData = createImageData(imageUrl, currentAlt)
+      onChange(newImageData)
       onBlur?.()
     } catch (error) {
       console.error('🐛 DEBUG - Cloudinary upload failed:', error)
@@ -98,7 +108,16 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
+    setShowAltText(false)
     onBlur?.()
+  }
+  
+  const handleAltTextChange = (newAlt: string) => {
+    if (currentUrl) {
+      const newImageData = createImageData(currentUrl, newAlt)
+      onChange(newImageData)
+      onBlur?.()
+    }
   }
 
   const handleReplaceClick = () => {
@@ -107,7 +126,7 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
     }
   }
 
-  const hasImage = uploadedFile || (value && value.trim() !== '')
+  const hasImage = uploadedFile || currentUrl
 
   return (
     <div className={className}>
@@ -136,10 +155,10 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
                     alt="Preview"
                     className="w-12 h-12 object-cover rounded border"
                   />
-                ) : value && value.startsWith('http') ? (
+                ) : currentUrl ? (
                   <img
-                    src={value}
-                    alt="Uploaded image"
+                    src={currentUrl}
+                    alt={currentAlt || "Uploaded image"}
                     className="w-12 h-12 object-cover rounded border"
                     onError={(e) => {
                       // Show fallback if image fails to load
@@ -163,17 +182,35 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
                 ) : (
                   <>
                     <p className="text-sm font-medium text-grey-90 truncate">
-                      {uploadedFile ? uploadedFile.name : value && value.startsWith('http') ? 'Uploaded image' : value || 'No image'}
+                      {uploadedFile ? uploadedFile.name : currentUrl ? 'Uploaded image' : 'No image'}
                     </p>
-                    <p className="text-xs text-grey-50">
-                      {uploadedFile ? `${(uploadedFile.size / 1024).toFixed(1)} KB` : 'Cloudinary hosted'}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs text-grey-50">
+                        {uploadedFile ? `${(uploadedFile.size / 1024).toFixed(1)} KB` : 'Cloudinary hosted'}
+                      </p>
+                      {currentAlt && (
+                        <div className="bg-violet-10 px-1.5 py-0.5 rounded text-[10px] text-violet-60 font-medium">
+                          ALT
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
               
               {/* Actions */}
               <div className="flex gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="small"
+                  onClick={() => setShowAltText(!showAltText)}
+                  className="p-1 text-xs"
+                  disabled={isUploading}
+                  title="Edit alt text"
+                >
+                  ALT
+                </Button>
                 <Button
                   type="button"
                   variant="ghost"
@@ -196,6 +233,31 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
                 </Button>
               </div>
             </div>
+            
+            {/* Alt Text Section */}
+            {showAltText && (
+              <div className="mt-3 pt-3 border-t border-grey-20 bg-grey-5 -mx-3 -mb-3 px-3 pb-3 rounded-b-rounded">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium text-grey-90">Alt Text</span>
+                  <div className="bg-violet-10 px-1.5 py-0.5 rounded text-[10px] text-violet-60 font-medium">
+                    SEO
+                  </div>
+                </div>
+                <InputField
+                  name={`${name}_alt`}
+                  value={currentAlt}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleAltTextChange(e.target.value)}
+                  placeholder="Describe this image for SEO and accessibility..."
+                  className="mb-2"
+                />
+                <div className="flex justify-between items-center text-xs text-grey-50">
+                  <span>Improves accessibility and search rankings</span>
+                  <span className={currentAlt.length > 125 ? 'text-rose-50' : ''}>
+                    {currentAlt.length}/125 chars
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div 

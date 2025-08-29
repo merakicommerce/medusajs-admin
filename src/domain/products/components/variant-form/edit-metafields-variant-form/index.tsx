@@ -4,6 +4,7 @@ import RichTextField from "../../../../../components/molecules/rich-text-field"
 import BooleanField from "../../../../../components/molecules/boolean-field"
 import ImageArrayField from "../../../../../components/molecules/image-array-field"
 import CompactImageField from "../../../../../components/molecules/compact-image-field"
+import { type ImageData, type ImageMetadata } from "../../../../../utils/image-metadata-utils"
 
 interface Metadata {
   color: string
@@ -12,10 +13,10 @@ interface Metadata {
   material: string
   heading_1: string
   heading_2: string
-  dimension_image: string
-  description_image_1: string
-  description_image_2: string
-  images: string[] | string
+  dimension_image: ImageMetadata
+  description_image_1: ImageMetadata
+  description_image_2: ImageMetadata
+  images: ImageData[] | string[] | string
 }
 // Define field configurations for better rendering
 const fieldConfig = {

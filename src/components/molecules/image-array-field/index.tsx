@@ -5,12 +5,16 @@ import InputError from '../../atoms/input-error'
 import Button from '../../fundamentals/button'
 import TrashIcon from '../../fundamentals/icons/trash-icon'
 import PlusIcon from '../../fundamentals/icons/plus-icon'
+import EditIcon from '../../fundamentals/icons/edit-icon'
+import Modal from '../modal'
+import InputField from '../input'
+import { normalizeImageArray, createImageData, type ImageArrayMetadata, type ImageData } from '../../../utils/image-metadata-utils'
 
 type ImageArrayFieldProps = {
   label: string
   name: string
-  value?: string[] | string
-  onChange: (value: string[]) => void
+  value?: ImageArrayMetadata
+  onChange: (value: ImageData[] | string[]) => void
   onBlur?: () => void
   required?: boolean
   errors?: { [x: string]: unknown }
@@ -29,26 +33,12 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
 }) => {
   const [isUploading, setIsUploading] = useState(false)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+  const [editingAltIndex, setEditingAltIndex] = useState<number | null>(null)
+  const [tempAltText, setTempAltText] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Parse the value - handle both string and array formats
-  const parseImages = (val: string[] | string | undefined): string[] => {
-    if (!val) return []
-    if (Array.isArray(val)) return val
-    if (typeof val === 'string') {
-      try {
-        // Try to parse as JSON array
-        const parsed = JSON.parse(val)
-        return Array.isArray(parsed) ? parsed : [val]
-      } catch {
-        // If not JSON, treat as single URL
-        return val ? [val] : []
-      }
-    }
-    return []
-  }
-
-  const images = parseImages(value)
+  // Parse and normalize the image data
+  const images = normalizeImageArray(value)
 
   // Upload image to Cloudinary
   const uploadToCloudinary = async (file: File): Promise<string> => {
@@ -82,7 +72,9 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
       const uploadPromises = Array.from(files).map(uploadToCloudinary)
       const uploadedUrls = await Promise.all(uploadPromises)
       
-      const newImages = [...images, ...uploadedUrls]
+      // Convert URLs to ImageData objects
+      const uploadedImages = uploadedUrls.map(url => createImageData(url))
+      const newImages = [...images, ...uploadedImages]
       onChange(newImages)
       onBlur?.()
     } catch (error) {
@@ -118,7 +110,8 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
       try {
         const uploadedUrl = await uploadToCloudinary(file)
         const newImages = [...images]
-        newImages[indexToReplace] = uploadedUrl
+        // Preserve existing alt text when replacing image
+        newImages[indexToReplace] = createImageData(uploadedUrl, images[indexToReplace].alt)
         onChange(newImages)
         onBlur?.()
       } catch (error) {
@@ -128,6 +121,31 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
       }
     }
     input.click()
+  }
+
+  // Alt text handling
+  const handleEditAlt = (index: number) => {
+    setEditingAltIndex(index)
+    setTempAltText(images[index].alt || '')
+  }
+
+  const handleSaveAlt = () => {
+    if (editingAltIndex !== null) {
+      const newImages = [...images]
+      newImages[editingAltIndex] = {
+        ...newImages[editingAltIndex],
+        alt: tempAltText
+      }
+      onChange(newImages)
+      onBlur?.()
+      setEditingAltIndex(null)
+      setTempAltText('')
+    }
+  }
+
+  const handleCancelAlt = () => {
+    setEditingAltIndex(null)
+    setTempAltText('')
   }
 
   // Drag and drop handlers
@@ -154,14 +172,14 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
     }
 
     const newImages = [...images]
-    const draggedImage = newImages[draggedIndex]
+    const draggedImageData = newImages[draggedIndex]
     
     // Remove from original position
     newImages.splice(draggedIndex, 1)
     
     // Insert at new position
     const actualDropIndex = draggedIndex < dropIndex ? dropIndex - 1 : dropIndex
-    newImages.splice(actualDropIndex, 0, draggedImage)
+    newImages.splice(actualDropIndex, 0, draggedImageData)
     
     onChange(newImages)
     onBlur?.()
@@ -179,12 +197,12 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
       <div className="space-y-3">
         {/* Image Grid */}
         {images.length > 0 && (
-          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-            {images.map((imageUrl, index) => (
+          <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {images.map((imageData, index) => (
               <div
-                key={`${imageUrl}-${index}`}
+                key={`${imageData.url}-${index}`}
                 className={clsx(
-                  'relative group bg-grey-5 border border-grey-20 rounded-rounded overflow-hidden aspect-square cursor-move w-16 h-16',
+                  'relative group bg-grey-5 border border-grey-20 rounded-rounded overflow-hidden aspect-square cursor-move w-24 h-24',
                   {
                     'opacity-50': draggedIndex === index,
                     'ring-2 ring-violet-60': draggedIndex !== null && draggedIndex !== index,
@@ -197,8 +215,8 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
                 onDrop={(e) => handleDrop(e, index)}
               >
                 <img
-                  src={imageUrl}
-                  alt={`Product image ${index + 1}`}
+                  src={imageData.url}
+                  alt={imageData.alt || `Product image ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
                 
@@ -208,8 +226,19 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
                     variant="secondary"
                     size="small"
                     className="opacity-0 group-hover:opacity-100 transition-opacity text-xs px-1 py-1"
+                    onClick={() => handleEditAlt(index)}
+                    type="button"
+                    title="Edit alt text"
+                  >
+                    ALT
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-xs px-1 py-1"
                     onClick={() => handleReplaceImage(index)}
                     type="button"
+                    title="Replace image"
                   >
                     ↻
                   </Button>
@@ -219,6 +248,7 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
                     className="opacity-0 group-hover:opacity-100 transition-opacity px-1 py-1"
                     onClick={() => handleRemoveImage(index)}
                     type="button"
+                    title="Remove image"
                   >
                     <TrashIcon size={12} />
                   </Button>
@@ -228,6 +258,13 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
                 <div className="absolute top-0.5 left-0.5 bg-white bg-opacity-90 text-xs px-1 py-0.5 rounded text-grey-90 text-[10px] leading-none">
                   {index + 1}
                 </div>
+                
+                {/* Alt text indicator */}
+                {imageData.alt && (
+                  <div className="absolute bottom-0.5 left-0.5 bg-violet-60 bg-opacity-90 text-white text-[10px] px-1 py-0.5 rounded leading-none">
+                    ALT
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -273,6 +310,61 @@ const ImageArrayField: React.FC<ImageArrayFieldProps> = ({
       </div>
 
       <InputError name={name} errors={errors} />
+      
+      {/* Alt Text Editing Modal */}
+      {editingAltIndex !== null && (
+        <Modal handleClose={handleCancelAlt}>
+          <Modal.Header handleClose={handleCancelAlt}>
+            <h1 className="inter-xlarge-semibold">
+              Edit Alt Text
+            </h1>
+          </Modal.Header>
+          <Modal.Content>
+            <div className="flex gap-4 mb-4">
+              <img
+                src={images[editingAltIndex].url}
+                alt="Preview"
+                className="w-20 h-20 object-cover rounded border"
+              />
+              <div className="flex-1">
+                <p className="text-sm text-grey-70 mb-2">
+                  Add descriptive alt text for this image to improve SEO and accessibility.
+                </p>
+                <InputField
+                  label="Alt Text"
+                  name="altText"
+                  value={tempAltText}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTempAltText(e.target.value)}
+                  placeholder="Describe what's shown in this image..."
+                />
+                <p className="text-xs text-grey-50 mt-1">
+                  {tempAltText.length}/125 characters (recommended for SEO)
+                </p>
+              </div>
+            </div>
+          </Modal.Content>
+          <Modal.Footer>
+            <div className="flex items-center justify-end w-full gap-x-xsmall">
+              <Button
+                variant="secondary"
+                size="small"
+                type="button"
+                onClick={handleCancelAlt}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="small"
+                type="button"
+                onClick={handleSaveAlt}
+              >
+                Save Alt Text
+              </Button>
+            </div>
+          </Modal.Footer>
+        </Modal>
+      )}
     </div>
   )
 }
