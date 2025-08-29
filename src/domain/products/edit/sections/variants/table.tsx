@@ -16,6 +16,7 @@ type Props = {
     updateVariant: (variant: ProductVariant) => void
     updateInstagramImagesVariant: (variant: ProductVariant) => void
     updateMetadataVariant: (variant: ProductVariant) => void
+    updateSEOVariant: (variant: ProductVariant) => void
   }
 }
 
@@ -97,6 +98,7 @@ const VariantsTable = ({ variants, actions }: Props) => {
     updateVariant,
     duplicateVariant,
     updateMetadataVariant,
+    updateSEOVariant,
   } = actions
 
   return (
@@ -137,6 +139,11 @@ const VariantsTable = ({ variants, actions }: Props) => {
                       {
                         label: "Update Metadata",
                         onClick: () => updateMetadataVariant(row.original),
+                        icon: <EditIcon size="20" />,
+                      },
+                      {
+                        label: "Edit SEO",
+                        onClick: () => updateSEOVariant(row.original),
                         icon: <EditIcon size="20" />,
                       },
                       {

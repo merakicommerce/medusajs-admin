@@ -17,6 +17,10 @@ interface Metadata {
   description_image_1: ImageMetadata
   description_image_2: ImageMetadata
   images: ImageData[] | string[] | string
+  // SEO fields
+  meta_title: string
+  meta_keyword: string
+  meta_description: string
 }
 // Define field configurations for better rendering
 const fieldConfig = {

@@ -11,6 +11,7 @@ import AddVariantModal from "./add-variant-modal"
 import EditDimensionVariantModal from "./edit-demension-image-variant-modal"
 import EditImagesVariantModal from "./edit-images-variant-modal"
 import EditIMetadataVariantModal from "./edit-metadata-variant-modal"
+import EditSEOVariantModal from "./edit-seo-variant-modal"
 import EditVariantModal from "./edit-variant-modal"
 import EditVariantsModal from "./edit-variants-modal"
 import OptionsModal from "./options-modal"
@@ -34,6 +35,9 @@ const VariantsSection = ({ product }: Props) => {
     { base: ProductVariant } | undefined
   >(undefined)
   const [variantToUpdateMetadata, setVariantToUpdateMetadata] = useState<
+    { base: ProductVariant } | undefined
+  >(undefined)
+  const [variantToUpdateSEO, setVariantToUpdateSEO] = useState<
     { base: ProductVariant } | undefined
   >(undefined)
   const {
@@ -99,6 +103,9 @@ const VariantsSection = ({ product }: Props) => {
   const handleUpdateMetadataVariant = (variant: ProductVariant) => {
     setVariantToUpdateMetadata({ base: variant })
   }
+  const handleUpdateSEOVariant = (variant: ProductVariant) => {
+    setVariantToUpdateSEO({ base: variant })
+  }
   return (
     <OptionsProvider product={product}>
       <Section title="Variants" actions={actions}>
@@ -120,6 +127,7 @@ const VariantsSection = ({ product }: Props) => {
               updateInstagramImagesVariant: handleUpdateInstagramImagesVariant,
               updateDimensionImageVariant: handleUpdateDimensionImageVariant,
               updateMetadataVariant: handleUpdateMetadataVariant,
+              updateSEOVariant: handleUpdateSEOVariant,
             }}
           />
         </div>
@@ -175,6 +183,13 @@ const VariantsSection = ({ product }: Props) => {
           variant={variantToUpdateMetadata.base}
           product={product}
           onClose={() => setVariantToUpdateMetadata(undefined)}
+        />
+      )}
+      {variantToUpdateSEO && (
+        <EditSEOVariantModal
+          variant={variantToUpdateSEO.base}
+          product={product}
+          onClose={() => setVariantToUpdateSEO(undefined)}
         />
       )}
     </OptionsProvider>

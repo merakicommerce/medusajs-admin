@@ -323,32 +323,8 @@ Color: Natural Oak"
               </div>
             </div>
 
-            {/* SEO Fields */}
-            <div className="mb-6">
-              <h3 className="text-base font-medium text-grey-90 mb-4">SEO Settings</h3>
-              <div className="space-y-4">
-                <InputField
-                  label="Meta Title"
-                  {...register("metadata.meta_title")}
-                  placeholder="Custom title for search engines and social media"
-                  errors={errors}
-                />
-                <InputField
-                  label="Meta Keywords"
-                  {...register("metadata.meta_keyword")}
-                  placeholder="Comma-separated keywords for SEO"
-                  errors={errors}
-                />
-                <Textarea
-                  label="Meta Description"
-                  {...register("metadata.meta_description")}
-                  placeholder="Brief description for search engines (150-160 characters recommended)"
-                  errors={errors}
-                  rows={3}
-                />
-              </div>
-            </div>
           </div>
+
 
           {/* Floating Save Button */}
           {isDirty && (
