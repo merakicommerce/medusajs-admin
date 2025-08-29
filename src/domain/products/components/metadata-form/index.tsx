@@ -30,6 +30,14 @@ const fieldConfig = {
   inspiredOfInformation: { type: 'richtext', label: 'Inspired Of Information', section: 'content' },
   dimension_image: { type: 'image', label: 'Dimension Image', section: 'media' },
 }
+
+// Helper function to get appropriate placeholder text
+const getPlaceholderText = (fieldId: keyof Metadata, label: string) => {
+  if (fieldId === 'description' || fieldId === 'product_information') {
+    return `Enter ${label.toLowerCase()}...\n\nFor structured data, use format:\nTop: Brushed Brass\nBase: White Marble\nStyle: Modern Classic`
+  }
+  return `Enter ${label.toLowerCase()}...`
+}
 export type EditMetadataProductFormType = {
   metadata: Metadata
 }
@@ -48,6 +56,8 @@ const EditIMetadataProductForm = ({ form }: Props) => {
 
   const renderField = (fieldId: keyof Metadata, config: any) => {
     const currentValue = watch(`metadata.${fieldId}` as any) || ''
+    
+    console.log(`🐛 DEBUG - Rendering field ${fieldId}:`, currentValue)
 
     switch (config.type) {
       case 'richtext':
@@ -57,8 +67,11 @@ const EditIMetadataProductForm = ({ form }: Props) => {
             label={config.label}
             name={`metadata.${fieldId}`}
             value={currentValue}
-            onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
-            placeholder={`Enter ${config.label.toLowerCase()}...`}
+            onChange={(value) => {
+              console.log(`🐛 DEBUG - Setting ${fieldId} to:`, value)
+              setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })
+            }}
+            placeholder={getPlaceholderText(fieldId, config.label)}
             errors={errors}
           />
         )
@@ -70,7 +83,10 @@ const EditIMetadataProductForm = ({ form }: Props) => {
             label={config.label}
             name={`metadata.${fieldId}`}
             value={currentValue}
-            onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
+            onChange={(value) => {
+              console.log(`🐛 DEBUG - Setting ${fieldId} to:`, value)
+              setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })
+            }}
             errors={errors}
           />
         )

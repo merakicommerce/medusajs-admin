@@ -1,4 +1,4 @@
-import medusaRequest, {backendRequest, directBackendRequest} from "./request"
+import medusaRequest, {backendRequest} from "./request"
 
 const removeNullish = (obj) =>
   Object.entries(obj).reduce((a, [k, v]) => (v ? ((a[k] = v), a) : a), {})
@@ -15,12 +15,12 @@ const buildQueryFromObject = (search, prefix = "") =>
 export default {
   abadonedCarts: {
     list() {
-      console.log("🐛 DEBUG - Fetching abandoned carts using direct backend request...")
+      console.log("🐛 DEBUG - Fetching abandoned carts using backend request...")
       
-      // Use the direct backend request that matches your working curl command
-      return directBackendRequest("/admin/abandon_cart/all")
+      // Use the backend request that matches your working curl command
+      return backendRequest("/admin/abandon_cart/all")
         .then((data) => {
-          console.log("🐛 DEBUG - Direct backend response:", data)
+          console.log("🐛 DEBUG - Backend response:", data)
           return data || []
         })
         .catch((error) => {
@@ -33,15 +33,15 @@ export default {
         })
     },
     retrieve(cartid) {
-      console.log("🐛 DEBUG - Retrieving abandoned cart using direct backend:", cartid)
+      console.log("🐛 DEBUG - Retrieving abandoned cart using backend:", cartid)
       
-      return directBackendRequest(`/admin/abandon_cart/${cartid}`)
+      return backendRequest(`/admin/abandon_cart/${cartid}`)
         .then((data) => {
-          console.log("🐛 DEBUG - Direct cart retrieve response:", data)
+          console.log("🐛 DEBUG - Cart retrieve response:", data)
           return data
         })
         .catch((error) => {
-          console.log("🐛 DEBUG - Direct cart retrieve failed:", error.message)
+          console.log("🐛 DEBUG - Cart retrieve failed:", error.message)
           return null
         })
     },

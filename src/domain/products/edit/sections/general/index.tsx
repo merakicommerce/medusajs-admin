@@ -51,18 +51,18 @@ const GeneralSection = ({ product }: Props) => {
       onClick: toggleInfoMetadata,
       icon: <EditIcon size={20} />,
     },
-    isFeatureEnabled("sales_channels") && {
+    ...(isFeatureEnabled("sales_channels") ? [{
       label: "Edit Sales Channels",
       onClick: toggleChannels,
       icon: <ChannelsIcon size={20} />,
-    },
+    }] : []),
     {
       label: "Delete",
       onClick: onDelete,
       variant: "danger",
       icon: <TrashIcon size={20} />,
     },
-  ].filter(Boolean)
+  ]
 
   return (
     <>

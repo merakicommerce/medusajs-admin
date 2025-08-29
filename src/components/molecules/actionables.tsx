@@ -23,7 +23,10 @@ const Actionables: React.FC<ActionablesProps> = ({
   customTrigger,
   forceDropdown = false,
 }) => {
-  if (actions && (forceDropdown || actions.length > 1)) {
+  // Ensure actions is always an array
+  const validActions = Array.isArray(actions) ? actions : []
+  
+  if (validActions.length > 0 && (forceDropdown || validActions.length > 1)) {
     return (
       <div>
         <DropdownMenu.Root>
@@ -45,7 +48,7 @@ const Actionables: React.FC<ActionablesProps> = ({
             sideOffset={5}
             className="border bg-grey-0 border-grey-20 rounded-rounded shadow-dropdown p-xsmall min-w-[200px] z-30"
           >
-            {actions.map((action, i) => {
+            {validActions.map((action, i) => {
               return (
                 <DropdownMenu.Item className="mb-1 last:mb-0" key={i}>
                   {
@@ -85,7 +88,7 @@ const Actionables: React.FC<ActionablesProps> = ({
     )
   }
 
-  const [action] = actions ?? []
+  const [action] = validActions
   if (action) {
     return (
       <div>

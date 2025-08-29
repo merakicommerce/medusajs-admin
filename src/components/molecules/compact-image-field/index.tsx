@@ -5,6 +5,7 @@ import InputError from '../../atoms/input-error'
 import Button from '../../fundamentals/button'
 import TrashIcon from '../../fundamentals/icons/trash-icon'
 import EditIcon from '../../fundamentals/icons/edit-icon'
+import Spinner from '../../atoms/spinner'
 
 type CompactImageFieldProps = {
   label: string
@@ -27,17 +28,67 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
   errors,
   className
 }) => {
+  const [isUploading, setIsUploading] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Direct Cloudinary upload function without widget
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const cloudName = "dfgbpib38"
+    const uploadPreset = "z48xz3qg"
+    
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('upload_preset', uploadPreset)
+    
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: formData
+    })
+    
+    if (!response.ok) {
+      throw new Error(`Cloudinary upload failed: ${response.statusText}`)
+    }
+    
+    const data = await response.json()
+    console.log('🐛 DEBUG - Cloudinary upload success:', data)
+    return data.secure_url
+  }
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) {
-      setUploadedFile(file)
-      // In a real implementation, you'd upload to a CDN and get back a URL
-      // For now, we'll just use the file name
-      onChange(file.name)
+    if (!file) return
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+    if (!validTypes.includes(file.type)) {
+      console.error('🐛 DEBUG - Invalid file type:', file.type)
+      return
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      console.error('🐛 DEBUG - File too large:', file.size)
+      return
+    }
+
+    setUploadedFile(file)
+    setIsUploading(true)
+    
+    try {
+      const imageUrl = await uploadToCloudinary(file)
+      console.log('🐛 DEBUG - Image uploaded successfully:', imageUrl)
+      onChange(imageUrl)
       onBlur?.()
+    } catch (error) {
+      console.error('🐛 DEBUG - Cloudinary upload failed:', error)
+      // Reset file input on error
+      setUploadedFile(null)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    } finally {
+      setIsUploading(false)
     }
   }
 
@@ -51,10 +102,12 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
   }
 
   const handleReplaceClick = () => {
-    fileInputRef.current?.click()
+    if (!isUploading && fileInputRef.current) {
+      fileInputRef.current.click()
+    }
   }
 
-  const hasImage = uploadedFile || value
+  const hasImage = uploadedFile || (value && value.trim() !== '')
 
   return (
     <div className={className}>
@@ -83,6 +136,16 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
                     alt="Preview"
                     className="w-12 h-12 object-cover rounded border"
                   />
+                ) : value && value.startsWith('http') ? (
+                  <img
+                    src={value}
+                    alt="Uploaded image"
+                    className="w-12 h-12 object-cover rounded border"
+                    onError={(e) => {
+                      // Show fallback if image fails to load
+                      ;(e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
                 ) : (
                   <div className="w-12 h-12 bg-grey-20 rounded border flex items-center justify-center">
                     <span className="text-xs text-grey-50">IMG</span>
@@ -92,13 +155,20 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
               
               {/* File Info */}
               <div className="flex-grow min-w-0">
-                <p className="text-sm font-medium text-grey-90 truncate">
-                  {uploadedFile ? uploadedFile.name : value}
-                </p>
-                {uploadedFile && (
-                  <p className="text-xs text-grey-50">
-                    {(uploadedFile.size / 1024).toFixed(1)} KB
-                  </p>
+                {isUploading ? (
+                  <div className="flex items-center gap-2">
+                    <Spinner size="small" />
+                    <span className="text-sm text-grey-50">Uploading...</span>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-grey-90 truncate">
+                      {uploadedFile ? uploadedFile.name : value && value.startsWith('http') ? 'Uploaded image' : value || 'No image'}
+                    </p>
+                    <p className="text-xs text-grey-50">
+                      {uploadedFile ? `${(uploadedFile.size / 1024).toFixed(1)} KB` : 'Cloudinary hosted'}
+                    </p>
+                  </>
                 )}
               </div>
               
@@ -110,6 +180,7 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
                   size="small"
                   onClick={handleReplaceClick}
                   className="p-1"
+                  disabled={isUploading}
                 >
                   <EditIcon size={16} />
                 </Button>
@@ -119,6 +190,7 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
                   size="small"
                   onClick={handleRemoveImage}
                   className="p-1 text-rose-50 hover:text-rose-60"
+                  disabled={isUploading}
                 >
                   <TrashIcon size={16} />
                 </Button>
@@ -127,23 +199,31 @@ const CompactImageField: React.FC<CompactImageFieldProps> = ({
           </div>
         ) : (
           <div 
-            className="p-4 text-center cursor-pointer hover:bg-grey-10 transition-colors"
+            className={clsx(
+              "p-4 text-center transition-colors",
+              isUploading 
+                ? "cursor-not-allowed bg-grey-5" 
+                : "cursor-pointer hover:bg-grey-10"
+            )}
             onClick={handleReplaceClick}
           >
             <div className="flex flex-col items-center gap-2">
               <div className="w-8 h-8 bg-grey-20 rounded border-2 border-dashed border-grey-30 flex items-center justify-center">
                 <span className="text-xs text-grey-50">+</span>
               </div>
-              <p className="text-sm text-grey-50">Click to upload image</p>
+              <p className="text-sm text-grey-50">
+                {isUploading ? "Uploading..." : "Click to upload image"}
+              </p>
             </div>
           </div>
         )}
       </div>
       
+      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/gif,image/jpeg,image/jpg,image/png,image/webp"
+        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
         onChange={handleFileSelect}
         className="hidden"
       />

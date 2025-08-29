@@ -37,14 +37,34 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
     return temp.textContent || temp.innerText || ''
   }
 
-  // Function to convert plain text to basic HTML
+  // Function to convert plain text to structured HTML
   const textToHtml = (text: string) => {
-    return text
+    const lines = text
       .split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0)
-      .map(line => `<p>${line}</p>`)
-      .join('')
+    
+    // Check if content looks like key-value pairs (contains colons)
+    const hasKeyValuePairs = lines.some(line => line.includes(':'))
+    
+    if (hasKeyValuePairs) {
+      // Format as list for key-value pairs
+      const listItems = lines.map(line => {
+        if (line.includes(':')) {
+          const [key, ...valueParts] = line.split(':')
+          const value = valueParts.join(':').trim()
+          return `<li style="text-align: left;"><strong>${key.trim()}:</strong> ${value}</li>`
+        } else {
+          // Handle non-colon lines as regular list items
+          return `<li style="text-align: left;">${line}</li>`
+        }
+      }).join('')
+      
+      return `<ul>${listItems}</ul>`
+    } else {
+      // Regular paragraph format for non-structured content
+      return lines.map(line => `<p>${line}</p>`).join('')
+    }
   }
 
   useEffect(() => {

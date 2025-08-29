@@ -1,67 +1,75 @@
 import { Product } from "@medusajs/medusa"
-import React from "react"
-import EditIcon from "../../../../../components/fundamentals/icons/edit-icon"
-import { ActionType } from "../../../../../components/molecules/actionables"
+import { useAdminUpdateProduct } from "medusa-react"
+import { useForm } from "react-hook-form"
+import Button from "../../../../../components/fundamentals/button"
+import EditIMetadataProductForm, { EditMetadataProductFormType } from "../../../components/metadata-form"
 import Section from "../../../../../components/organisms/section"
-import useToggleState from "../../../../../hooks/use-toggle-state"
-import AttributeModal from "./attribute-modal"
 
 type Props = {
   product: Product
 }
 
 const AttributesSection = ({ product }: Props) => {
-  const { state, toggle, close } = useToggleState()
+  const updateProduct = useAdminUpdateProduct(product.id)
 
-  const actions: ActionType[] = [
-    {
-      label: "Edit Attributes",
-      onClick: toggle,
-      icon: <EditIcon size={20} />,
+  // Ensure metadata is a proper object
+  const productMetadata = product.metadata && typeof product.metadata === 'object' 
+    ? product.metadata 
+    : {}
+
+  const form = useForm<EditMetadataProductFormType>({
+    defaultValues: {
+      metadata: {
+        sku: productMetadata.sku || '',
+        inspiredOf: productMetadata.inspiredOf || '',
+        description: productMetadata.description || '',
+        product_type: productMetadata.product_type || '',
+        description_1: productMetadata.description_1 || '',
+        description_2: productMetadata.description_2 || '',
+        dimension_image: productMetadata.dimension_image || '',
+        magento_product_id: productMetadata.magento_product_id || '',
+        product_information: productMetadata.product_information || '',
+        inspiredOfInformation: productMetadata.inspiredOfInformation || '',
+        google_product_category: productMetadata.google_product_category || '',
+      },
     },
-  ]
+  })
+
+  const { handleSubmit, formState: { isDirty } } = form
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      await updateProduct.mutateAsync({
+        metadata: data.metadata,
+      })
+      console.log('🐛 DEBUG - Metadata saved successfully:', data.metadata)
+    } catch (error) {
+      console.error('🐛 DEBUG - Failed to save metadata:', error)
+    }
+  })
 
   return (
-    <>
-      <Section title="Attributes" actions={actions} forceDropdown>
-        <div className="flex flex-col gap-y-xsmall mb-large mt-base">
-          <h2 className="inter-base-semibold">Dimensions</h2>
-          <div className="flex flex-col gap-y-xsmall">
-            <Attribute attribute="Height" value={product.height} />
-            <Attribute attribute="Width" value={product.width} />
-            <Attribute attribute="Length" value={product.length} />
-            <Attribute attribute="Weight" value={product.weight} />
-          </div>
-        </div>
-        <div className="flex flex-col gap-y-xsmall">
-          <h2 className="inter-base-semibold">Customs</h2>
-          <div className="flex flex-col gap-y-xsmall">
-            <Attribute attribute="MID Code" value={product.mid_code} />
-            <Attribute attribute="HS Code" value={product.hs_code} />
-            <Attribute
-              attribute="Country of origin"
-              value={product.origin_country}
-            />
-          </div>
+    <form onSubmit={onSubmit}>
+      <Section
+        title="Product Metadata"
+        description="Additional product information and custom fields"
+        actions={
+          <Button
+            variant="secondary"
+            size="small"
+            type="submit"
+            disabled={!isDirty || updateProduct.isLoading}
+            loading={updateProduct.isLoading}
+          >
+            Save metadata
+          </Button>
+        }
+      >
+        <div className="mt-base">
+          <EditIMetadataProductForm form={form} />
         </div>
       </Section>
-
-      <AttributeModal onClose={close} open={state} product={product} />
-    </>
-  )
-}
-
-type AttributeProps = {
-  attribute: string
-  value: string | number | null
-}
-
-const Attribute = ({ attribute, value }: AttributeProps) => {
-  return (
-    <div className="flex items-center justify-between w-full inter-base-regular text-grey-50">
-      <p>{attribute}</p>
-      <p>{value || "–"}</p>
-    </div>
+    </form>
   )
 }
 
