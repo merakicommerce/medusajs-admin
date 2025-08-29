@@ -5,7 +5,7 @@ import Button from "../../../../../components/fundamentals/button"
 import Modal from "../../../../../components/molecules/modal"
 import useNotification from "../../../../../hooks/use-notification"
 import { FormImage } from "../../../../../types/shared"
-import { prepareImages } from "../../../../../utils/images"
+import { prepareCloudinaryImages } from "../../../../../utils/cloudinary-images"
 import { nestedForm } from "../../../../../utils/nested-form"
 import MediaForm, { MediaFormType } from "../../../components/media-form"
 import useEditProductActions from "../../hooks/use-edit-product-actions"
@@ -47,18 +47,10 @@ const MediaModal = ({ product, open, onClose }: Props) => {
     let preppedImages: FormImage[] = []
 
     try {
-      preppedImages = await prepareImages(data.media.images)
+      preppedImages = await prepareCloudinaryImages(data.media.images)
     } catch (error) {
-      let errorMessage = "Something went wrong while trying to upload images."
-      const response = (error as any).response as Response
-
-      if (response.status === 500) {
-        errorMessage =
-          errorMessage +
-          " " +
-          "You might not have a file service configured. Please contact your administrator"
-      }
-
+      let errorMessage = "Something went wrong while trying to upload images to Cloudinary."
+      
       notification("Error", errorMessage, "error")
       return
     }

@@ -110,9 +110,10 @@ export const getEditIMetadataVariantDefaultValues = (
     heading_2,
     description_image_1,
     description_image_2,
+    images,
   } = variant.metadata as {
     color: string
-    in_stock: string
+    in_stock: boolean | string
     leadtime: string
     material: string
     heading_1: string
@@ -120,11 +121,12 @@ export const getEditIMetadataVariantDefaultValues = (
     dimension_image: string
     description_image_1: string
     description_image_2: string
+    images: string[] | string
   }
   return {
     metadata: {
       color,
-      in_stock,
+      in_stock: in_stock || false,
       leadtime,
       material,
       heading_1,
@@ -132,6 +134,7 @@ export const getEditIMetadataVariantDefaultValues = (
       heading_2,
       description_image_1,
       description_image_2,
+      images: images || [],
     },
   }
 }

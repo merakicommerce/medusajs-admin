@@ -5,7 +5,7 @@ import Button from "../../../../../components/fundamentals/button"
 import Modal from "../../../../../components/molecules/modal"
 import useNotification from "../../../../../hooks/use-notification"
 import { FormImage } from "../../../../../types/shared"
-import { prepareImages } from "../../../../../utils/images"
+import { prepareCloudinaryImages } from "../../../../../utils/cloudinary-images"
 import { nestedForm } from "../../../../../utils/nested-form"
 import ThumbnailForm, {
   ThumbnailFormType,
@@ -49,18 +49,10 @@ const ThumbnailModal = ({ product, open, onClose }: Props) => {
     let preppedImages: FormImage[] = []
 
     try {
-      preppedImages = await prepareImages(data.thumbnail.images)
+      preppedImages = await prepareCloudinaryImages(data.thumbnail.images)
     } catch (error) {
       let errorMessage =
-        "Something went wrong while trying to upload the thumbnail."
-      const response = (error as any).response as Response
-
-      if (response.status === 500) {
-        errorMessage =
-          errorMessage +
-          " " +
-          "You might not have a file service configured. Please contact your administrator"
-      }
+        "Something went wrong while trying to upload the thumbnail to Cloudinary."
 
       notification("Error", errorMessage, "error")
       return

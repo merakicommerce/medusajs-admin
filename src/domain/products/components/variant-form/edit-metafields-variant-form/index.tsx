@@ -1,11 +1,13 @@
 import { UseFormReturn } from "react-hook-form"
 import InputField from "../../../../../components/molecules/input"
 import RichTextField from "../../../../../components/molecules/rich-text-field"
+import BooleanField from "../../../../../components/molecules/boolean-field"
+import ImageArrayField from "../../../../../components/molecules/image-array-field"
 import CompactImageField from "../../../../../components/molecules/compact-image-field"
 
 interface Metadata {
   color: string
-  in_stock: string
+  in_stock: boolean | string
   leadtime: string
   material: string
   heading_1: string
@@ -13,11 +15,12 @@ interface Metadata {
   dimension_image: string
   description_image_1: string
   description_image_2: string
+  images: string[] | string
 }
 // Define field configurations for better rendering
 const fieldConfig = {
   color: { type: 'text', label: 'Color', section: 'basic' },
-  in_stock: { type: 'text', label: 'In Stock', section: 'basic' },
+  in_stock: { type: 'boolean', label: 'In Stock', section: 'basic' },
   leadtime: { type: 'text', label: 'Lead Time', section: 'basic' },
   material: { type: 'text', label: 'Material', section: 'basic' },
   heading_1: { type: 'richtext', label: 'Heading 1', section: 'content' },
@@ -25,6 +28,7 @@ const fieldConfig = {
   dimension_image: { type: 'image', label: 'Dimension Image', section: 'images' },
   description_image_1: { type: 'image', label: 'Description Image 1', section: 'images' },
   description_image_2: { type: 'image', label: 'Description Image 2', section: 'images' },
+  images: { type: 'image-array', label: 'Product Images', section: 'images' },
 }
 export type EditMetadataVariantFormType = {
   metadata: Metadata
@@ -62,6 +66,30 @@ const EditIMetadataVariantForm = ({ form }: Props) => {
       case 'image':
         return (
           <CompactImageField
+            key={fieldId}
+            label={config.label}
+            name={`metadata.${fieldId}`}
+            value={currentValue}
+            onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
+            errors={errors}
+          />
+        )
+      
+      case 'boolean':
+        return (
+          <BooleanField
+            key={fieldId}
+            label={config.label}
+            name={`metadata.${fieldId}`}
+            value={currentValue}
+            onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
+            errors={errors}
+          />
+        )
+      
+      case 'image-array':
+        return (
+          <ImageArrayField
             key={fieldId}
             label={config.label}
             name={`metadata.${fieldId}`}

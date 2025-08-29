@@ -20,6 +20,8 @@ const MetadataTest = () => {
         product_information: '',
         inspiredOfInformation: '',
         google_product_category: '',
+        in_stock: false,
+        images: [],
       },
     },
   })

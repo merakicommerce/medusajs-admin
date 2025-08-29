@@ -1,6 +1,9 @@
 import { UseFormReturn } from "react-hook-form"
 import InputField from "../../../../components/molecules/input"
 import RichTextField from "../../../../components/molecules/rich-text-field"
+import KeyValueField from "../../../../components/molecules/key-value-field"
+import BooleanField from "../../../../components/molecules/boolean-field"
+import ImageArrayField from "../../../../components/molecules/image-array-field"
 import CompactImageField from "../../../../components/molecules/compact-image-field"
 
 interface Metadata {
@@ -15,6 +18,8 @@ interface Metadata {
   product_information: string
   inspiredOfInformation: string
   google_product_category: string
+  in_stock: boolean | string
+  images: string[] | string
 }
 // Define field configurations for better rendering
 const fieldConfig = {
@@ -23,12 +28,14 @@ const fieldConfig = {
   magento_product_id: { type: 'text', label: 'Magento Product ID', section: 'basic' },
   google_product_category: { type: 'text', label: 'Google Product Category', section: 'basic' },
   inspiredOf: { type: 'text', label: 'Inspired Of', section: 'basic' },
-  description: { type: 'richtext', label: 'Description', section: 'content' },
+  in_stock: { type: 'boolean', label: 'In Stock', section: 'basic' },
+  description: { type: 'keyvalue', label: 'Description', section: 'content' },
   description_1: { type: 'richtext', label: 'Description 1', section: 'content' },
   description_2: { type: 'richtext', label: 'Description 2', section: 'content' },
-  product_information: { type: 'richtext', label: 'Product Information', section: 'content' },
+  product_information: { type: 'keyvalue', label: 'Product Information', section: 'content' },
   inspiredOfInformation: { type: 'richtext', label: 'Inspired Of Information', section: 'content' },
   dimension_image: { type: 'image', label: 'Dimension Image', section: 'media' },
+  images: { type: 'image-array', label: 'Product Images', section: 'media' },
 }
 
 // Helper function to get appropriate placeholder text
@@ -72,6 +79,52 @@ const EditIMetadataProductForm = ({ form }: Props) => {
               setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })
             }}
             placeholder={getPlaceholderText(fieldId, config.label)}
+            errors={errors}
+          />
+        )
+      
+      case 'keyvalue':
+        return (
+          <KeyValueField
+            key={fieldId}
+            label={config.label}
+            name={`metadata.${fieldId}`}
+            value={currentValue}
+            onChange={(value) => {
+              console.log(`🐛 DEBUG - Setting ${fieldId} to:`, value)
+              setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })
+            }}
+            placeholder={getPlaceholderText(fieldId, config.label)}
+            errors={errors}
+          />
+        )
+      
+      case 'boolean':
+        return (
+          <BooleanField
+            key={fieldId}
+            label={config.label}
+            name={`metadata.${fieldId}`}
+            value={currentValue}
+            onChange={(value) => {
+              console.log(`🐛 DEBUG - Setting ${fieldId} to:`, value)
+              setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })
+            }}
+            errors={errors}
+          />
+        )
+      
+      case 'image-array':
+        return (
+          <ImageArrayField
+            key={fieldId}
+            label={config.label}
+            name={`metadata.${fieldId}`}
+            value={currentValue}
+            onChange={(value) => {
+              console.log(`🐛 DEBUG - Setting ${fieldId} to:`, value)
+              setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })
+            }}
             errors={errors}
           />
         )

@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import InputHeader from '../../fundamentals/input-header'
 import InputError from '../../atoms/input-error'
 
-type RichTextFieldProps = {
+type KeyValueFieldProps = {
   label: string
   name: string
   value?: string
@@ -15,7 +15,7 @@ type RichTextFieldProps = {
   className?: string
 }
 
-const RichTextField: React.FC<RichTextFieldProps> = ({
+const KeyValueField: React.FC<KeyValueFieldProps> = ({
   label,
   name,
   value = '',
@@ -27,11 +27,13 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
   className
 }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [htmlContent, setHtmlContent] = useState(value)
-  const editableRef = useRef<HTMLDivElement>(null)
+  const [keyValueContent, setKeyValueContent] = useState('')
+  const editableRef = useRef<HTMLTextAreaElement>(null)
 
   // Function to parse complex HTML (tables, lists) to key-value pairs
   const parseHtmlToKeyValue = (html: string) => {
+    if (!html) return ''
+    
     const temp = document.createElement('div')
     temp.innerHTML = html
     
@@ -86,13 +88,8 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
     return keyValuePairs.length > 0 ? keyValuePairs.join('\n') : (temp.textContent || temp.innerText || '')
   }
 
-  // Function to strip HTML tags for display
-  const stripHtml = (html: string) => {
-    return parseHtmlToKeyValue(html)
-  }
-
-  // Function to convert plain text to structured HTML
-  const textToHtml = (text: string) => {
+  // Function to convert plain text key-value pairs to structured HTML
+  const keyValueToHtml = (text: string) => {
     const lines = text
       .split('\n')
       .map(line => line.trim())
@@ -122,29 +119,24 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
   }
 
   useEffect(() => {
-    setHtmlContent(value)
+    const parsedContent = parseHtmlToKeyValue(value)
+    setKeyValueContent(parsedContent)
   }, [value])
 
   const handleStartEdit = () => {
     setIsEditing(true)
     setTimeout(() => {
       if (editableRef.current) {
-        // Set the content as plain text for editing
-        editableRef.current.textContent = stripHtml(htmlContent)
         editableRef.current.focus()
       }
     }, 0)
   }
 
   const handleFinishEdit = () => {
-    if (editableRef.current) {
-      const plainText = editableRef.current.textContent || ''
-      const newHtmlContent = textToHtml(plainText)
-      setHtmlContent(newHtmlContent)
-      onChange(newHtmlContent)
-      setIsEditing(false)
-      onBlur?.()
-    }
+    const newHtmlContent = keyValueToHtml(keyValueContent)
+    onChange(newHtmlContent)
+    setIsEditing(false)
+    onBlur?.()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -152,9 +144,7 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
       handleFinishEdit()
     } else if (e.key === 'Escape') {
       setIsEditing(false)
-      if (editableRef.current) {
-        editableRef.current.textContent = stripHtml(value)
-      }
+      setKeyValueContent(parseHtmlToKeyValue(value))
     }
   }
 
@@ -177,21 +167,23 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
         onClick={!isEditing ? handleStartEdit : undefined}
       >
         {isEditing ? (
-          <div
+          <textarea
             ref={editableRef}
-            contentEditable
-            className="outline-none w-full min-h-[60px] text-grey-90 leading-base"
+            value={keyValueContent}
+            onChange={(e) => setKeyValueContent(e.target.value)}
+            className="outline-none w-full min-h-[60px] text-grey-90 leading-base bg-transparent resize-none"
             onBlur={handleFinishEdit}
             onKeyDown={handleKeyDown}
-            style={{ whiteSpace: 'pre-wrap' }}
+            placeholder={placeholder}
+            rows={6}
           />
         ) : (
           <div 
             className={clsx("text-grey-90 leading-base min-h-[60px] whitespace-pre-wrap", {
-              "text-grey-40": !htmlContent
+              "text-grey-40": !keyValueContent
             })}
           >
-            {htmlContent ? parseHtmlToKeyValue(htmlContent) : (
+            {keyValueContent || (
               <span className="text-grey-40">{placeholder || 'Click to edit...'}</span>
             )}
           </div>
@@ -207,4 +199,4 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
   )
 }
 
-export default RichTextField
+export default KeyValueField
