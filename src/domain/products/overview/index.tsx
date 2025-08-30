@@ -1,5 +1,5 @@
-import { useAdminCreateBatchJob, useAdminCreateCollection } from "medusa-react"
-import React, { useContext, useEffect, useState } from "react"
+import { useAdminCreateCollection } from "medusa-react"
+import React, { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import Fade from "../../../components/atoms/fade-wrapper"
 import Button from "../../../components/fundamentals/button"
@@ -17,7 +17,6 @@ import useToggleState from "../../../hooks/use-toggle-state"
 import { getErrorMessage } from "../../../utils/error-messages"
 import ImportProducts from "../batch-job/import"
 import NewProduct from "../new"
-import { PollingContext } from "../../../context/polling"
 
 const VIEWS = ["products", "collections"]
 
@@ -31,8 +30,6 @@ const Overview = () => {
     open: openProductCreate,
   } = useToggleState()
 
-  const { resetInterval } = useContext(PollingContext)
-  const createBatchJob = useAdminCreateBatchJob()
 
   const notification = useNotification()
 
@@ -140,24 +137,202 @@ const Overview = () => {
     )
   }
 
-  const handleCreateExport = () => {
-    const reqObj = {
-      type: "product-export",
-      context: {},
-      dry_run: false,
+  const handleCreateExport = async () => {
+    try {
+      notification("Loading", "Preparing export...", "info")
+      
+      // Fetch products data directly from API
+      const response = await fetch("/api/admin/products?fields=id,title,handle,status,description,collection_id&expand=variants,options,variants.prices,variants.options,collection,tags,type,images,sales_channels&is_giftcard=false&limit=1000", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Export failed with status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      // Convert JSON to CSV
+      function jsonToCsv(json) {
+        if (!json || json.length === 0) {
+          return '';
+        }
+        
+        // Extract fields from the first item to use as headers
+        const fields = Object.keys(json[0]);
+        const replacer = (key, value) => value === null ? '' : value;
+        
+        // Create CSV rows
+        const csv = json.map(row => {
+          return fields.map(fieldName => {
+            return JSON.stringify(row[fieldName], replacer);
+          }).join(',');
+        });
+        
+        // Add header row
+        csv.unshift(fields.join(','));
+        return csv.join('\r\n');
+      }
+      
+      // Process the products data for CSV export
+      const csvData = data.products.map(product => {
+        return {
+          "ID": product.id,
+          "Title": product.title,
+          "Handle": product.handle,
+          "Status": product.status,
+          "Description": product.description || '',
+          "Collection": product.collection?.title || '',
+          "Type": product.type?.value || '',
+          "Tags": product.tags?.map(tag => tag.value).join('; ') || '',
+          "Thumbnail": product.thumbnail || '',
+          "Variant Count": product.variants?.length || 0,
+          "Option Count": product.options?.length || 0,
+          "Created At": product.created_at ? new Date(product.created_at).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+          }) : '',
+          "Updated At": product.updated_at ? new Date(product.updated_at).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+          }) : ''
+        };
+      });
+      
+      const csv = jsonToCsv(csvData);
+      
+      // Create and download the CSV file
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.setAttribute('download', 'products.csv');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      // Cleanup
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      notification("Success", "Products exported successfully", "success")
+    } catch (error) {
+      console.error("Export failed:", error)
+      notification("Error", "Export failed. Please try again.", "error")
     }
 
-    createBatchJob.mutate(reqObj, {
-      onSuccess: () => {
-        resetInterval()
-        notification("Success", "Successfully initiated export", "success")
-      },
-      onError: (err) => {
-        notification("Error", getErrorMessage(err), "error")
-      },
-    })
-
     closeExportModal()
+  }
+
+  const handleDownloadProductsCsv = async () => {
+    try {
+      notification("Loading", "Preparing export...", "info")
+      
+      // Fetch products data directly from API
+      const response = await fetch("/api/admin/products?fields=id,title,handle,status,description,collection_id&expand=variants,options,variants.prices,variants.options,collection,tags,type,images,sales_channels&is_giftcard=false&limit=1000", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include'
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Export failed with status: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      
+      // Convert JSON to CSV
+      function jsonToCsv(json) {
+        if (!json || json.length === 0) {
+          return '';
+        }
+        
+        // Extract fields from the first item to use as headers
+        const fields = Object.keys(json[0]);
+        const replacer = (key, value) => value === null ? '' : value;
+        
+        // Create CSV rows
+        const csv = json.map(row => {
+          return fields.map(fieldName => {
+            return JSON.stringify(row[fieldName], replacer);
+          }).join(',');
+        });
+        
+        // Add header row
+        csv.unshift(fields.join(','));
+        return csv.join('\r\n');
+      }
+      
+      // Process the products data for CSV export
+      const csvData = data.products.map(product => {
+        return {
+          "ID": product.id,
+          "Title": product.title,
+          "Handle": product.handle,
+          "Status": product.status,
+          "Description": product.description || '',
+          "Collection": product.collection?.title || '',
+          "Type": product.type?.value || '',
+          "Tags": product.tags?.map(tag => tag.value).join('; ') || '',
+          "Thumbnail": product.thumbnail || '',
+          "Variant Count": product.variants?.length || 0,
+          "Option Count": product.options?.length || 0,
+          "Created At": product.created_at ? new Date(product.created_at).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+          }) : '',
+          "Updated At": product.updated_at ? new Date(product.updated_at).toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true
+          }) : ''
+        };
+      });
+      
+      const csv = jsonToCsv(csvData);
+      
+      // Create and download the CSV file
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.setAttribute('download', 'products.csv');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      // Cleanup
+      window.URL.revokeObjectURL(downloadUrl);
+      
+      notification("Success", "Products exported successfully", "success")
+    } catch (error) {
+      console.error("Export failed:", error)
+      notification("Error", "Export failed. Please try again.", "error")
+    }
   }
 
   return (
@@ -191,7 +366,7 @@ const Overview = () => {
           title="Export Products"
           handleClose={() => closeExportModal()}
           onSubmit={handleCreateExport}
-          loading={createBatchJob.isLoading}
+          loading={false}
         />
       )}
       {importModalOpen && (
