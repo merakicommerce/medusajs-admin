@@ -3,6 +3,7 @@ import Button from "../../fundamentals/button"
 import PlusIcon from "../../fundamentals/icons/plus-icon"
 import TrashIcon from "../../fundamentals/icons/trash-icon"
 import InputField from "../../molecules/input"
+import RichTextField from "../../molecules/rich-text-field"
 
 type AddMetadataProps = {
   metadata: MetadataField[]
@@ -94,27 +95,44 @@ type FieldProps = {
 }
 
 const Field: React.FC<FieldProps> = ({ field, updateKey, updateValue }) => {
+  const [currentKey, setCurrentKey] = useState(field.key)
+  const isRichTextField = currentKey === "description"
+  
   return (
-    <div className="flex items-center w-full gap-x-xsmall">
+    <div className="flex items-start w-full gap-x-xsmall">
       <div className="maw-w-[200px]">
         <InputField
           label="Key"
           placeholder="Some key"
           defaultValue={field.key}
           onChange={(e) => {
-            updateKey(e.currentTarget.value)
+            const newKey = e.currentTarget.value
+            setCurrentKey(newKey)
+            updateKey(newKey)
           }}
         />
       </div>
       <div className="flex-grow">
-        <InputField
-          label="Value"
-          placeholder="Some value"
-          defaultValue={field.value}
-          onChange={(e) => {
-            updateValue(e.currentTarget.value)
-          }}
-        />
+        {isRichTextField ? (
+          <RichTextField
+            label="Value"
+            name="metadata-value"
+            value={field.value}
+            onChange={(value) => {
+              updateValue(value)
+            }}
+            placeholder="Enter description..."
+          />
+        ) : (
+          <InputField
+            label="Value"
+            placeholder="Some value"
+            defaultValue={field.value}
+            onChange={(e) => {
+              updateValue(e.currentTarget.value)
+            }}
+          />
+        )}
       </div>
     </div>
   )

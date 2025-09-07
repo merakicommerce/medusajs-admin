@@ -7,14 +7,15 @@ import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import BackButton from "../../../components/atoms/back-button"
 import Spinner from "../../../components/atoms/spinner"
+import Button from "../../../components/fundamentals/button"
 import EditIcon from "../../../components/fundamentals/icons/edit-icon"
 import TrashIcon from "../../../components/fundamentals/icons/trash-icon"
 import Actionables from "../../../components/molecules/actionables"
+import InputField from "../../../components/molecules/input"
 import JSONView from "../../../components/molecules/json-view"
+import RichTextField from "../../../components/molecules/rich-text-field"
 import DeletePrompt from "../../../components/organisms/delete-prompt"
-import { MetadataField } from "../../../components/organisms/metadata"
 import Section from "../../../components/organisms/section"
-import CollectionModal from "../../../components/templates/collection-modal"
 import AddProductsTable from "../../../components/templates/collection-product-table/add-product-table"
 import ViewProductsTable from "../../../components/templates/collection-product-table/view-products-table"
 import useNotification from "../../../hooks/use-notification"
@@ -27,12 +28,18 @@ const CollectionDetails = () => {
   const { collection, isLoading, refetch } = useAdminCollection(id!)
   const deleteCollection = useAdminDeleteCollection(id!)
   const updateCollection = useAdminUpdateCollection(id!)
-  const [showEdit, setShowEdit] = useState(false)
   const [showDelete, setShowDelete] = useState(false)
   const [showAddProducts, setShowAddProducts] = useState(false)
   const navigate = useNavigate()
   const notification = useNotification()
   const [updates, setUpdates] = useState(0)
+  const [description, setDescription] = useState("")
+  const [originalDescription, setOriginalDescription] = useState("")
+  const [title, setTitle] = useState("")
+  const [originalTitle, setOriginalTitle] = useState("")
+  const [handle, setHandle] = useState("")
+  const [originalHandle, setOriginalHandle] = useState("")
+  const [hasChanges, setHasChanges] = useState(false)
 
   const handleDelete = () => {
     deleteCollection.mutate(undefined, {
@@ -40,38 +47,61 @@ const CollectionDetails = () => {
     })
   }
 
-  const handleUpdateDetails = (data: any, metadata: MetadataField[]) => {
-    const payload: {
-      title: string
-      handle?: string
-      metadata?: object
-    } = {
-      title: data.title,
-      handle: data.handle,
+  const handleSaveCollection = () => {
+    const currentMetadata = collection?.metadata || {}
+    const updatedMetadata = {
+      ...currentMetadata,
+      description: description,
     }
 
-    if (metadata) {
-      const base = Object.keys(collection?.metadata ?? {}).reduce(
-        (acc, next) => ({ ...acc, [next]: null }),
-        {}
-      )
+    console.log("Saving description:", description)
+    console.log("Updated metadata:", updatedMetadata)
 
-      const payloadMetadata = metadata.reduce((acc, next) => {
-        return {
-          ...acc,
-          [next.key]: next.value ?? null,
-        }
-      }, base)
-
-      payload.metadata = payloadMetadata // deleting metadata will not work as it's not supported by the core
-    }
-
-    updateCollection.mutate(payload, {
-      onSuccess: () => {
-        setShowEdit(false)
-        refetch()
+    updateCollection.mutate(
+      {
+        title: title,
+        handle: handle,
+        metadata: updatedMetadata,
       },
-    })
+      {
+        onSuccess: () => {
+          notification("Success", "Collection updated successfully", "success")
+          setOriginalDescription(description)
+          setOriginalTitle(title)
+          setOriginalHandle(handle)
+          setHasChanges(false)
+          refetch()
+        },
+        onError: (error) => {
+          notification("Error", getErrorMessage(error), "error")
+        },
+      }
+    )
+  }
+
+  const handleDescriptionChange = (value: string) => {
+    console.log("Description changed:", value)
+    console.log("Description contains <br>:", value.includes('<br>'))
+    setDescription(value)
+  }
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    console.log("Title changed:", value)
+    setTitle(value)
+  }
+
+  const handleHandleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    console.log("Handle changed:", value)
+    setHandle(value)
+  }
+
+  const handleReset = () => {
+    setTitle(originalTitle)
+    setHandle(originalHandle)
+    setDescription(originalDescription)
+    setHasChanges(false)
   }
 
   const handleAddProducts = async (
@@ -105,6 +135,32 @@ const CollectionDetails = () => {
     }
   }, [collection?.products])
 
+  useEffect(() => {
+    if (collection) {
+      const desc = collection.metadata?.description as string || ""
+      const collectionTitle = collection.title || ""
+      const collectionHandle = collection.handle || ""
+      
+      console.log("Loading collection description from API:", desc)
+      console.log("Description contains <br> tags:", desc.includes('<br>'))
+      
+      setDescription(desc)
+      setOriginalDescription(desc)
+      setTitle(collectionTitle)
+      setOriginalTitle(collectionTitle)
+      setHandle(collectionHandle)
+      setOriginalHandle(collectionHandle)
+      setHasChanges(false)
+    }
+  }, [collection])
+
+  useEffect(() => {
+    const titleChanged = title !== originalTitle
+    const handleChanged = handle !== originalHandle
+    const descriptionChanged = description !== originalDescription
+    setHasChanges(titleChanged || handleChanged || descriptionChanged)
+  }, [title, handle, description, originalTitle, originalHandle, originalDescription])
+
   return (
     <>
       <div className="flex flex-col !pb-xlarge">
@@ -120,32 +176,73 @@ const CollectionDetails = () => {
             </div>
           ) : (
             <div>
-              <div>
-                <div className="flex items-center justify-between">
-                  <h2 className="inter-xlarge-semibold mb-2xsmall">
-                    {collection.title}
-                  </h2>
-                  <Actionables
-                    forceDropdown
-                    actions={[
-                      {
-                        label: "Edit Collection",
-                        onClick: () => setShowEdit(true),
-                        icon: <EditIcon size="20" />,
-                      },
-                      {
-                        label: "Delete",
-                        onClick: () => setShowDelete(!showDelete),
-                        variant: "danger",
-                        icon: <TrashIcon size="20" />,
-                      },
-                    ]}
-                  />
-                </div>
-                <p className="inter-small-regular text-grey-50">
-                  /{collection.handle}
-                </p>
+              <div className="flex items-center justify-between mb-large">
+                <h2 className="inter-xlarge-semibold">Edit Collection</h2>
+                <Actionables
+                  forceDropdown
+                  actions={[
+                    {
+                      label: "Delete",
+                      onClick: () => setShowDelete(!showDelete),
+                      variant: "danger",
+                      icon: <TrashIcon size="20" />,
+                    },
+                  ]}
+                />
               </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-large">
+                <InputField
+                  label="Title"
+                  placeholder="Collection title"
+                  value={title}
+                  onChange={handleTitleChange}
+                />
+                <InputField
+                  label="Handle"
+                  placeholder="collection-handle"
+                  value={handle}
+                  onChange={handleHandleChange}
+                  prefix="/"
+                />
+              </div>
+              
+              <div>
+                <RichTextField
+                  label="Description"
+                  name="collection-description"
+                  value={description}
+                  onChange={handleDescriptionChange}
+                  placeholder="Enter collection description..."
+                />
+              </div>
+              
+              {hasChanges && (
+                <div className="fixed bottom-8 right-8 bg-white rounded-lg shadow-lg border border-grey-20 p-4 flex items-center gap-x-4">
+                  <div className="flex flex-col">
+                    <p className="inter-base-semibold text-grey-90">Unsaved changes</p>
+                    <p className="inter-small-regular text-grey-50">Click save to apply changes</p>
+                  </div>
+                  <div className="flex items-center gap-x-2">
+                    <Button
+                      variant="ghost"
+                      size="small"
+                      onClick={handleReset}
+                      disabled={updateCollection.isLoading}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="small"
+                      onClick={handleSaveCollection}
+                      loading={updateCollection.isLoading}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              )}
               {collection.metadata && (
                 <div className="mt-large flex flex-col gap-y-base">
                   <h3 className="inter-base-semibold">Metadata</h3>
@@ -179,14 +276,6 @@ const CollectionDetails = () => {
           )}
         </Section>
       </div>
-      {showEdit && (
-        <CollectionModal
-          onClose={() => setShowEdit(!showEdit)}
-          onSubmit={handleUpdateDetails}
-          isEdit
-          collection={collection}
-        />
-      )}
       {showDelete && (
         <DeletePrompt
           handleClose={() => setShowDelete(!showDelete)}

@@ -26,137 +26,110 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
   errors,
   className
 }) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [htmlContent, setHtmlContent] = useState(value)
-  const editableRef = useRef<HTMLDivElement>(null)
+  const [internalValue, setInternalValue] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Function to parse complex HTML (tables, lists) to key-value pairs
-  const parseHtmlToKeyValue = (html: string) => {
-    const temp = document.createElement('div')
-    temp.innerHTML = html
+  // Convert HTML with <br> tags to plain text with newlines for editing
+  const htmlToPlainText = (html: string): string => {
+    if (!html) return ''
     
-    const keyValuePairs: string[] = []
+    // Handle <br> and <br/> and <br /> tags (case insensitive)
+    let plainText = html.replace(/<br\s*\/?>/gi, '\n')
     
-    // Extract from list items (li elements) - handles nested lists in tables
-    const listItems = temp.querySelectorAll('li')
-    listItems.forEach(li => {
-      const text = li.textContent || li.innerText || ''
-      if (text.includes(':')) {
-        const cleanedText = text
-          .replace(/\s+/g, ' ')  // Replace multiple spaces/newlines with single space
-          .trim()
-          .replace(/:\s*:/, ':') // Remove double colons
-        keyValuePairs.push(cleanedText)
-      }
-    })
+    // Handle paragraph tags by replacing </p><p> with double newlines and removing outer <p> tags
+    plainText = plainText.replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+    plainText = plainText.replace(/<\/?p[^>]*>/gi, '\n')
     
-    // If no list items found, try to extract from table cells
-    if (keyValuePairs.length === 0) {
-      const tableCells = temp.querySelectorAll('td, th')
-      tableCells.forEach(cell => {
-        const cellText = cell.textContent || cell.innerText || ''
-        const lines = cellText.split('\n').filter(line => line.trim())
-        lines.forEach(line => {
-          if (line.includes(':')) {
-            const cleanedText = line
-              .replace(/\s+/g, ' ')
-              .trim()
-              .replace(/:\s*:/, ':')
-            keyValuePairs.push(cleanedText)
-          }
-        })
-      })
-    }
+    // Handle div tags similarly to p tags
+    plainText = plainText.replace(/<\/div>\s*<div[^>]*>/gi, '\n')
+    plainText = plainText.replace(/<\/?div[^>]*>/gi, '\n')
     
-    // If still no pairs found, fall back to plain text extraction
-    if (keyValuePairs.length === 0) {
-      const plainText = temp.textContent || temp.innerText || ''
-      const lines = plainText.split('\n').filter(line => line.trim())
-      lines.forEach(line => {
-        if (line.includes(':')) {
-          const cleanedText = line
-            .replace(/\s+/g, ' ')
-            .trim()
-            .replace(/:\s*:/, ':')
-          keyValuePairs.push(cleanedText)
-        }
-      })
-    }
+    // Remove any other HTML tags
+    plainText = plainText.replace(/<[^>]*>/g, '')
     
-    return keyValuePairs.length > 0 ? keyValuePairs.join('\n') : (temp.textContent || temp.innerText || '')
+    // Decode HTML entities
+    const tempDiv = document.createElement('div')
+    tempDiv.innerHTML = plainText
+    plainText = tempDiv.textContent || tempDiv.innerText || ''
+    
+    // Clean up multiple newlines and trim
+    plainText = plainText.replace(/\n\s*\n\s*\n/g, '\n\n').trim()
+    
+    return plainText
   }
 
-  // Function to strip HTML tags for display
-  const stripHtml = (html: string) => {
-    return parseHtmlToKeyValue(html)
+  // Convert plain text with newlines to HTML with <br> tags for storage
+  const plainTextToHtml = (plainText: string): string => {
+    if (!plainText) return ''
+    
+    // Escape HTML characters first
+    const escaped = plainText
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+    
+    // Convert newlines to <br> tags
+    return escaped.replace(/\n/g, '<br>')
   }
 
-  // Function to convert plain text to structured HTML
-  const textToHtml = (text: string) => {
-    const lines = text
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0)
-    
-    // Check if content looks like key-value pairs (contains colons)
-    const hasKeyValuePairs = lines.some(line => line.includes(':'))
-    
-    if (hasKeyValuePairs) {
-      // Format as list for key-value pairs
-      const listItems = lines.map(line => {
-        if (line.includes(':')) {
-          const [key, ...valueParts] = line.split(':')
-          const value = valueParts.join(':').trim()
-          return `<li style="text-align: left;"><strong>${key.trim()}:</strong> ${value}</li>`
-        } else {
-          // Handle non-colon lines as regular list items
-          return `<li style="text-align: left;">${line}</li>`
-        }
-      }).join('')
-      
-      return `<ul>${listItems}</ul>`
-    } else {
-      // Regular paragraph format for non-structured content
-      return lines.map(line => `<p>${line}</p>`).join('')
-    }
-  }
-
+  // Initialize and sync with external value changes
   useEffect(() => {
-    setHtmlContent(value)
+    const plainText = htmlToPlainText(value || '')
+    setInternalValue(plainText)
   }, [value])
 
-  const handleStartEdit = () => {
-    setIsEditing(true)
-    setTimeout(() => {
-      if (editableRef.current) {
-        // Set the content as plain text for editing
-        editableRef.current.textContent = stripHtml(htmlContent)
-        editableRef.current.focus()
-      }
-    }, 0)
+  // Auto-resize textarea
+  const autoResize = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = 'auto'
+    textarea.style.height = `${Math.max(80, textarea.scrollHeight)}px`
   }
 
-  const handleFinishEdit = () => {
-    if (editableRef.current) {
-      const plainText = editableRef.current.textContent || ''
-      const newHtmlContent = textToHtml(plainText)
-      setHtmlContent(newHtmlContent)
-      onChange(newHtmlContent)
-      setIsEditing(false)
-      onBlur?.()
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    setInternalValue(newValue)
+    
+    // Auto-resize
+    autoResize(e.target)
+    
+    // Convert to HTML and call parent onChange
+    const htmlValue = plainTextToHtml(newValue)
+    onChange(htmlValue)
+  }
+
+  const handleTextareaBlur = () => {
+    onBlur?.()
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Allow normal Enter behavior for new lines
+    // Optionally, you can add Ctrl+Enter for some special action if needed
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const textarea = e.currentTarget
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const newValue = internalValue.substring(0, start) + '  ' + internalValue.substring(end)
+      setInternalValue(newValue)
+      
+      // Update HTML value
+      const htmlValue = plainTextToHtml(newValue)
+      onChange(htmlValue)
+      
+      // Set cursor position after the inserted spaces
+      setTimeout(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 2
+      }, 0)
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && e.ctrlKey) {
-      handleFinishEdit()
-    } else if (e.key === 'Escape') {
-      setIsEditing(false)
-      if (editableRef.current) {
-        editableRef.current.textContent = stripHtml(value)
-      }
+  // Auto-resize on mount and when value changes
+  useEffect(() => {
+    if (textareaRef.current) {
+      autoResize(textareaRef.current)
     }
-  }
+  }, [internalValue])
 
   return (
     <div className={className}>
@@ -165,44 +138,37 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
         required={required}
         className="mb-xsmall"
       />
-      <div
-        className={clsx(
-          'w-full min-h-[80px] px-small py-xsmall bg-grey-5 border border-grey-20 rounded-rounded cursor-text',
-          'focus-within:shadow-input focus-within:border-violet-60',
-          {
-            'border-rose-50 focus-within:shadow-cta focus-within:shadow-rose-60/10 focus-within:border-rose-50':
-              errors && name && errors[name],
-          }
-        )}
-        onClick={!isEditing ? handleStartEdit : undefined}
-      >
-        {isEditing ? (
-          <div
-            ref={editableRef}
-            contentEditable
-            className="outline-none w-full min-h-[60px] text-grey-90 leading-base"
-            onBlur={handleFinishEdit}
-            onKeyDown={handleKeyDown}
-            style={{ whiteSpace: 'pre-wrap' }}
-          />
-        ) : (
-          <div 
-            className={clsx("text-grey-90 leading-base min-h-[60px] whitespace-pre-wrap", {
-              "text-grey-40": !htmlContent
-            })}
-          >
-            {htmlContent ? parseHtmlToKeyValue(htmlContent) : (
-              <span className="text-grey-40">{placeholder || 'Click to edit...'}</span>
-            )}
-          </div>
-        )}
+      <div className="relative">
+        <textarea
+          ref={textareaRef}
+          name={name}
+          value={internalValue}
+          onChange={handleTextareaChange}
+          onBlur={handleTextareaBlur}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder || 'Enter description...'}
+          className={clsx(
+            'w-full min-h-[80px] max-h-[400px] px-small py-xsmall bg-grey-5 border border-grey-20 rounded-rounded resize-none',
+            'focus:shadow-input focus:border-violet-60 focus:outline-none',
+            'text-grey-90 leading-base font-normal text-small',
+            'placeholder:text-grey-40',
+            {
+              'border-rose-50 focus:shadow-cta focus:shadow-rose-60/10 focus:border-rose-50':
+                errors && name && errors[name],
+            }
+          )}
+          style={{
+            lineHeight: '1.5',
+            fontFamily: 'inherit'
+          }}
+        />
       </div>
-      {isEditing && (
-        <p className="text-xs text-grey-50 mt-1">
-          Press Ctrl+Enter to save, Escape to cancel
+      <div className="flex justify-between items-center mt-1">
+        <InputError name={name} errors={errors} />
+        <p className="text-xs text-grey-50">
+          Use Enter for new lines. HTML tags will be escaped automatically.
         </p>
-      )}
-      <InputError name={name} errors={errors} />
+      </div>
     </div>
   )
 }

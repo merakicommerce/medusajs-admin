@@ -57,13 +57,13 @@ const CollectionModal: React.FC<CollectionModalProps> = ({
       })
 
       if (collection.metadata) {
-        Object.entries(collection.metadata).map(([key, value]) => {
+        const newMetadata: MetadataField[] = []
+        Object.entries(collection.metadata).forEach(([key, value]) => {
           if (typeof value === "string") {
-            const newMeta = metadata
-            newMeta.push({ key, value })
-            setMetadata(newMeta)
+            newMetadata.push({ key, value })
           }
         })
+        setMetadata(newMetadata)
       }
     }
   }, [collection, isEdit])
