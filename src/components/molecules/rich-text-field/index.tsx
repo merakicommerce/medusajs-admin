@@ -150,7 +150,7 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
           className={clsx(
             'w-full min-h-[80px] max-h-[400px] px-small py-xsmall bg-grey-5 border border-grey-20 rounded-rounded resize-none',
             'focus:shadow-input focus:border-violet-60 focus:outline-none',
-            'text-grey-90 leading-base font-normal text-small',
+            'text-grey-90 leading-base font-normal',
             'placeholder:text-grey-40',
             {
               'border-rose-50 focus:shadow-cta focus:shadow-rose-60/10 focus:border-rose-50':
