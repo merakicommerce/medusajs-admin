@@ -5,13 +5,19 @@ import clsx from 'clsx'
 import Button from '../../../../components/fundamentals/button'
 import InputField from '../../../../components/molecules/input'
 import Textarea from '../../../../components/molecules/textarea'
+import RichTextField from '../../../../components/molecules/rich-text-field'
 import useNotification from '../../../../hooks/use-notification'
 import useEditProductActions from '../hooks/use-edit-product-actions'
 
 type EditableProductFormData = {
   title: string
   description: string
-  handle: string
+  metadata: {
+    heading_1: string
+    description_1: string
+    heading_2: string
+    description_2: string
+  }
 }
 
 type Props = {
@@ -45,7 +51,7 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
       {
         title: data.title,
         description: data.description,
-        handle: data.handle,
+        metadata: data.metadata,
       },
       () => {
         // onSuccess callback - this is what was missing!
@@ -81,14 +87,52 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
             />
           </div>
 
-          {/* Handle */}
+
+
+          {/* Heading 1 */}
           <div>
             <InputField
-              label="Handle"
-              {...register("handle")}
+              label="Heading 1"
+              {...register("metadata.heading_1")}
+              errors={errors}
+              placeholder="Enter heading for additional description 1..."
+            />
+          </div>
+
+          {/* Description 1 (Rich Text) */}
+          <div>
+            <RichTextField
+              label="Additional Description 1"
+              name="metadata.description_1"
+              value={watch("metadata.description_1") || ''}
+              onChange={(value) => setValue("metadata.description_1", value, { shouldDirty: true })}
+              placeholder="Enter additional description..."
               errors={errors}
             />
           </div>
+
+          {/* Heading 2 */}
+          <div>
+            <InputField
+              label="Heading 2"
+              {...register("metadata.heading_2")}
+              errors={errors}
+              placeholder="Enter heading for additional description 2..."
+            />
+          </div>
+
+          {/* Description 2 (Rich Text) */}
+          <div>
+            <RichTextField
+              label="Additional Description 2"
+              name="metadata.description_2"
+              value={watch("metadata.description_2") || ''}
+              onChange={(value) => setValue("metadata.description_2", value, { shouldDirty: true })}
+              placeholder="Enter additional description..."
+              errors={errors}
+            />
+          </div>
+
 
 
 
@@ -132,10 +176,16 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
 }
 
 const getDefaultValues = (product: Product): EditableProductFormData => {
+  const metadata = product.metadata || {}
   return {
     title: product.title || "",
     description: product.description || "",
-    handle: product.handle || "",
+    metadata: {
+      heading_1: (metadata.heading_1 as string) || "",
+      description_1: (metadata.description_1 as string) || "",
+      heading_2: (metadata.heading_2 as string) || "",
+      description_2: (metadata.description_2 as string) || "",
+    },
   }
 }
 

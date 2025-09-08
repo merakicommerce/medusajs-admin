@@ -13,7 +13,6 @@ import { useFeatureFlag } from "../../../../../context/feature-flag"
 import useToggleState from "../../../../../hooks/use-toggle-state"
 import useEditProductActions from "../../hooks/use-edit-product-actions"
 import EditableProductForm from "../../components/editable-product-form"
-import EditIMetadataProductModal from "../metadata/metadata-modal"
 import ChannelsModal from "./channels-modal"
 import GeneralModal from "./general-modal"
 
@@ -29,11 +28,6 @@ const GeneralSection = ({ product }: Props) => {
     toggle: toggleInfo,
   } = useToggleState()
   const {
-    state: infoMetadataState,
-    close: closeInfoMetadata,
-    toggle: toggleInfoMetadata,
-  } = useToggleState()
-  const {
     state: channelsState,
     close: closeChannels,
     toggle: toggleChannels,
@@ -45,11 +39,6 @@ const GeneralSection = ({ product }: Props) => {
     {
       label: "Edit General Information",
       onClick: toggleInfo,
-      icon: <EditIcon size={20} />,
-    },
-    {
-      label: "Edit Metadata",
-      onClick: toggleInfoMetadata,
       icon: <EditIcon size={20} />,
     },
     ...(isFeatureEnabled("sales_channels") ? [{
@@ -91,13 +80,6 @@ const GeneralSection = ({ product }: Props) => {
       </Section>
 
       <GeneralModal product={product} open={infoState} onClose={closeInfo} />
-      {infoMetadataState && (
-        <EditIMetadataProductModal
-          product={product}
-          open={infoMetadataState}
-          onClose={closeInfoMetadata}
-        />
-      )}
       <FeatureToggle featureFlag="sales_channels">
         <ChannelsModal
           product={product}
@@ -128,7 +110,6 @@ const ProductDetails = ({ product }: Props) => {
     <div className="flex flex-col mt-8 gap-y-3">
       <h2 className="inter-base-semibold">Details</h2>
       <Detail title="Subtitle" value={product.subtitle} />
-      <Detail title="Handle" value={product.handle} />
       <Detail title="Type" value={product.type?.value} />
       <Detail title="Collection" value={product.collection?.title} />
       <Detail
