@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
-import { Product } from '@medusajs/medusa'
+import { Product, ProductVariant } from '@medusajs/medusa'
 import clsx from 'clsx'
 import Button from '../../../../components/fundamentals/button'
 import InputField from '../../../../components/molecules/input'
@@ -8,6 +8,36 @@ import Textarea from '../../../../components/molecules/textarea'
 import RichTextField from '../../../../components/molecules/rich-text-field'
 import useNotification from '../../../../hooks/use-notification'
 import useEditProductActions from '../hooks/use-edit-product-actions'
+
+// Helper function to check if all variants have the same heading values
+const getCommonHeadingValues = (variants: ProductVariant[]) => {
+  if (!variants || variants.length === 0) {
+    return { 
+      heading_1: "", 
+      heading_2: "", 
+      hasMultipleValues: false,
+      hasVariants: false
+    }
+  }
+  
+  const firstVariant = variants[0]
+  const firstHeading1 = (firstVariant?.metadata?.heading_1 as string) || ""
+  const firstHeading2 = (firstVariant?.metadata?.heading_2 as string) || ""
+  
+  const allSameHeading1 = variants.every(variant => 
+    ((variant.metadata?.heading_1 as string) || "") === firstHeading1
+  )
+  const allSameHeading2 = variants.every(variant => 
+    ((variant.metadata?.heading_2 as string) || "") === firstHeading2
+  )
+  
+  return {
+    heading_1: allSameHeading1 ? firstHeading1 : "",
+    heading_2: allSameHeading2 ? firstHeading2 : "",
+    hasMultipleValues: !allSameHeading1 || !allSameHeading2,
+    hasVariants: true
+  }
+}
 
 type EditableProductFormData = {
   title: string
@@ -25,8 +55,11 @@ type Props = {
 }
 
 const EditableProductForm: React.FC<Props> = ({ product }) => {
-  const { onUpdate, updating } = useEditProductActions(product.id)
+  const { onUpdate, onUpdateVariant, updating, updatingVariant } = useEditProductActions(product.id)
   const notification = useNotification()
+  
+  // Get variant heading info for UI feedback
+  const variantHeadings = getCommonHeadingValues(product.variants || [])
 
   const methods = useForm<EditableProductFormData>({
     defaultValues: getDefaultValues(product)
@@ -46,18 +79,54 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
     reset(getDefaultValues(product))
   }, [product, reset])
 
-  const onSubmit = handleSubmit((data) => {
-    onUpdate(
-      {
-        title: data.title,
-        description: data.description,
-        metadata: data.metadata,
-      },
-      () => {
-        // onSuccess callback - this is what was missing!
-        console.log("Product updated successfully")
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      // First update the product basic info and description metadata (not headings)
+      await new Promise<void>((resolve, reject) => {
+        onUpdate(
+          {
+            title: data.title,
+            description: data.description,
+            metadata: {
+              // Only save description metadata to product, not headings
+              description_1: data.metadata.description_1,
+              description_2: data.metadata.description_2,
+            },
+          },
+          () => resolve(),
+        )
+      })
+      
+      // Then update all variants with heading values
+      if (product.variants && product.variants.length > 0) {
+        const variantUpdates = product.variants.map(variant => {
+          return new Promise<void>((resolve, reject) => {
+            onUpdateVariant(
+              variant.id,
+              {
+                metadata: {
+                  ...variant.metadata,
+                  heading_1: data.metadata.heading_1,
+                  heading_2: data.metadata.heading_2,
+                }
+              },
+              () => resolve(),
+              "" // No success message for individual variants
+            )
+          })
+        })
+        
+        await Promise.all(variantUpdates)
+        notification("Success", "Product and variant headings updated successfully", "success")
+      } else {
+        notification("Success", "Product updated successfully", "success")
       }
-    )
+      
+      console.log("Product and variants updated successfully")
+    } catch (error) {
+      console.error("Error updating product/variants:", error)
+      notification("Error", "Failed to update product", "error")
+    }
   })
 
   const handleReset = () => {
@@ -92,10 +161,16 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
           {/* Heading 1 */}
           <div>
             <InputField
-              label="Heading 1"
+              label={`Heading 1${!variantHeadings.hasVariants ? ' (No variants)' : variantHeadings.hasMultipleValues ? ' (Variants have different values)' : ''}`}
               {...register("metadata.heading_1")}
               errors={errors}
-              placeholder="Enter heading for additional description 1..."
+              placeholder={
+                !variantHeadings.hasVariants 
+                  ? "No variants to update" 
+                  : variantHeadings.hasMultipleValues 
+                    ? "Variants have different values - will update all to this value" 
+                    : "Enter heading for additional description 1..."
+              }
             />
           </div>
 
@@ -114,10 +189,16 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
           {/* Heading 2 */}
           <div>
             <InputField
-              label="Heading 2"
+              label={`Heading 2${!variantHeadings.hasVariants ? ' (No variants)' : variantHeadings.hasMultipleValues ? ' (Variants have different values)' : ''}`}
               {...register("metadata.heading_2")}
               errors={errors}
-              placeholder="Enter heading for additional description 2..."
+              placeholder={
+                !variantHeadings.hasVariants 
+                  ? "No variants to update" 
+                  : variantHeadings.hasMultipleValues 
+                    ? "Variants have different values - will update all to this value" 
+                    : "Enter heading for additional description 2..."
+              }
             />
           </div>
 
@@ -154,7 +235,7 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
                   variant="secondary"
                   size="small"
                   onClick={handleReset}
-                  disabled={updating}
+                  disabled={updating || updatingVariant}
                 >
                   Reset
                 </Button>
@@ -162,7 +243,7 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
                   variant="primary"
                   size="small"
                   onClick={onSubmit}
-                  loading={updating}
+                  loading={updating || updatingVariant}
                 >
                   Save
                 </Button>
@@ -177,13 +258,17 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
 
 const getDefaultValues = (product: Product): EditableProductFormData => {
   const metadata = product.metadata || {}
+  
+  // Get heading values from variants
+  const variantHeadings = getCommonHeadingValues(product.variants || [])
+  
   return {
     title: product.title || "",
     description: product.description || "",
     metadata: {
-      heading_1: (metadata.heading_1 as string) || "",
+      heading_1: variantHeadings.heading_1,
       description_1: (metadata.description_1 as string) || "",
-      heading_2: (metadata.heading_2 as string) || "",
+      heading_2: variantHeadings.heading_2,
       description_2: (metadata.description_2 as string) || "",
     },
   }
