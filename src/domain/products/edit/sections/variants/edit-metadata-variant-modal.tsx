@@ -102,7 +102,6 @@ export const getEditIMetadataVariantDefaultValues = (
 ): EditMetadataVariantFormType => {
   const {
     color,
-    in_stock,
     leadtime,
     material,
     description,
@@ -121,7 +120,6 @@ export const getEditIMetadataVariantDefaultValues = (
     meta_description,
   } = variant.metadata as {
     color: string
-    in_stock: boolean | string
     leadtime: string
     material: string
     description: string
@@ -142,7 +140,6 @@ export const getEditIMetadataVariantDefaultValues = (
   return {
     metadata: {
       color: color || '',
-      in_stock: in_stock || false,
       leadtime: leadtime || '',
       material: material || '',
       description: description || '',

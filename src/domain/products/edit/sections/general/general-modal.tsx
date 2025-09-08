@@ -4,13 +4,7 @@ import { useForm } from "react-hook-form"
 import Button from "../../../../../components/fundamentals/button"
 import Modal from "../../../../../components/molecules/modal"
 import { nestedForm } from "../../../../../utils/nested-form"
-import DiscountableForm, {
-  DiscountableFormType,
-} from "../../../components/discountable-form"
 import GeneralForm, { GeneralFormType } from "../../../components/general-form"
-import OrganizeForm, {
-  OrganizeFormType,
-} from "../../../components/organize-form"
 import EditIMetadataProductForm, {
   EditMetadataProductFormType,
 } from "../../../components/metadata-form"
@@ -24,8 +18,6 @@ type Props = {
 
 type GeneralFormWrapper = {
   general: GeneralFormType
-  organize: OrganizeFormType
-  discountable: DiscountableFormType
   metadata: EditMetadataProductFormType["metadata"]
 }
 
@@ -69,22 +61,6 @@ const GeneralModal = ({ product, open, onClose }: Props) => {
         // @ts-ignore
         description: data.general.description,
         // @ts-ignore
-        type: data.organize.type
-          ? {
-              id: data.organize.type.value,
-              value: data.organize.type.label,
-            }
-          : null,
-        // @ts-ignore
-        collection_id: data.organize.collection
-          ? data.organize.collection.value
-          : null,
-        // @ts-ignore
-        tags: data.organize.tags
-          ? data.organize.tags.map((t) => ({ value: t }))
-          : null,
-        discountable: data.discountable.value,
-        // @ts-ignore
         metadata: data.metadata || {},
       },
       onReset
@@ -102,11 +78,6 @@ const GeneralModal = ({ product, open, onClose }: Props) => {
         <form onSubmit={onSubmit}>
           <Modal.Content>
             <GeneralForm form={nestedForm(form, "general")} />
-            <div className="my-xlarge">
-              <h2 className="inter-base-semibold mb-base">Organize Product</h2>
-              <OrganizeForm form={nestedForm(form, "organize")} />
-            </div>
-            <DiscountableForm form={nestedForm(form, "discountable")} />
             <div className="my-xlarge">
               <h2 className="inter-base-semibold mb-base">Product Metadata</h2>
               <EditIMetadataProductForm form={form as any} />
@@ -147,18 +118,6 @@ const getDefaultValues = (product: Product): GeneralFormWrapper => {
       material: product.material,
       handle: product.handle!,
       description: product.description || null,
-    },
-    organize: {
-      collection: product.collection
-        ? { label: product.collection.title, value: product.collection.id }
-        : null,
-      type: product.type
-        ? { label: product.type.value, value: product.type.id }
-        : null,
-      tags: product.tags ? product.tags.map((t) => t.value) : null,
-    },
-    discountable: {
-      value: product.discountable,
     },
     metadata: {
       sku: product.metadata?.sku || "",

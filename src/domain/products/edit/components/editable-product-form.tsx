@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import { useForm, FormProvider } from 'react-hook-form'
+import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { Product, ProductVariant } from '@medusajs/medusa'
 import clsx from 'clsx'
 import Button from '../../../../components/fundamentals/button'
 import InputField from '../../../../components/molecules/input'
 import Textarea from '../../../../components/molecules/textarea'
 import RichTextField from '../../../../components/molecules/rich-text-field'
+import Switch from '../../../../components/atoms/switch'
+import { NextCreateableSelect, NextSelect } from '../../../../components/molecules/select/next-select'
+import TagInput from '../../../../components/molecules/tag-input'
+import { Option } from '../../../../types/shared'
 import useNotification from '../../../../hooks/use-notification'
 import useEditProductActions from '../hooks/use-edit-product-actions'
+import useOrganizeData from '../../components/organize-form/use-organize-data'
 
 // Helper function to check if all variants have the same heading values
 const getCommonHeadingValues = (variants: ProductVariant[]) => {
@@ -48,6 +53,12 @@ type EditableProductFormData = {
     heading_2: string
     description_2: string
   }
+  organize: {
+    type: Option | null
+    collection: Option | null
+    tags: string[] | null
+  }
+  discountable: boolean
 }
 
 type Props = {
@@ -57,6 +68,7 @@ type Props = {
 const EditableProductForm: React.FC<Props> = ({ product }) => {
   const { onUpdate, onUpdateVariant, updating, updatingVariant } = useEditProductActions(product.id)
   const notification = useNotification()
+  const { productTypeOptions, collectionOptions } = useOrganizeData()
   
   // Get variant heading info for UI feedback
   const variantHeadings = getCommonHeadingValues(product.variants || [])
@@ -71,6 +83,7 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
     reset,
     setValue,
     watch,
+    control,
     formState: { isDirty, errors }
   } = methods
 
@@ -78,6 +91,12 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
   useEffect(() => {
     reset(getDefaultValues(product))
   }, [product, reset])
+
+  const onCreateOption = (value: string) => {
+    const newOption = { label: value, value }
+    productTypeOptions.push(newOption)
+    setValue("organize.type", newOption, { shouldDirty: true })
+  }
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -92,6 +111,22 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
               description_1: data.metadata.description_1,
               description_2: data.metadata.description_2,
             },
+            // @ts-ignore
+            type: data.organize.type
+              ? {
+                  id: data.organize.type.value,
+                  value: data.organize.type.label,
+                }
+              : null,
+            // @ts-ignore
+            collection_id: data.organize.collection
+              ? data.organize.collection.value
+              : null,
+            // @ts-ignore
+            tags: data.organize.tags
+              ? data.organize.tags.map((t) => ({ value: t }))
+              : null,
+            discountable: data.discountable,
           },
           () => resolve(),
         )
@@ -156,7 +191,81 @@ const EditableProductForm: React.FC<Props> = ({ product }) => {
             />
           </div>
 
+          {/* Organize Product Section */}
+          <div className="border-t border-grey-20 pt-6 mt-6">
+            <h3 className="inter-base-semibold mb-4">Product Organization</h3>
+            
+            {/* Type and Collection Row - Hidden */}
+            {/* <div className="grid grid-cols-2 gap-x-4 mb-4">
+              <Controller
+                name="organize.type"
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <NextCreateableSelect
+                    label="Type"
+                    onChange={onChange}
+                    options={productTypeOptions}
+                    value={value || null}
+                    placeholder="Choose a type"
+                    onCreateOption={onCreateOption}
+                    isClearable
+                    isDisabled={updating || updatingVariant}
+                  />
+                )}
+              />
+              <Controller
+                name="organize.collection"
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <NextSelect
+                    label="Collection"
+                    onChange={onChange}
+                    options={collectionOptions}
+                    value={value}
+                    placeholder="Choose a collection"
+                    isClearable
+                    isDisabled={updating || updatingVariant}
+                  />
+                )}
+              />
+            </div> */}
 
+            {/* Tags */}
+            <div className="mb-4">
+              <Controller
+                control={control}
+                name="organize.tags"
+                render={({ field: { value, onChange } }) => (
+                  <TagInput
+                    onChange={onChange}
+                    values={value || []}
+                    disabled={updating || updatingVariant}
+                  />
+                )}
+              />
+            </div>
+
+            {/* Discountable - Hidden */}
+            {/* <div className="flex items-center justify-between mb-4">
+              <div>
+                <h4 className="inter-base-semibold">Discountable</h4>
+                <p className="inter-base-regular text-grey-50">
+                  When unchecked discounts will not be applied to this product.
+                </p>
+              </div>
+              <Controller
+                control={control}
+                name="discountable"
+                render={({ field: { value, onChange } }) => (
+                  <Switch 
+                    checked={value} 
+                    onCheckedChange={onChange}
+                    disabled={updating || updatingVariant}
+                  />
+                )}
+              />
+            </div> */}
+          </div>
 
           {/* Heading 1 */}
           <div>
@@ -271,6 +380,16 @@ const getDefaultValues = (product: Product): EditableProductFormData => {
       heading_2: variantHeadings.heading_2,
       description_2: (metadata.description_2 as string) || "",
     },
+    organize: {
+      collection: product.collection
+        ? { label: product.collection.title, value: product.collection.id }
+        : null,
+      type: product.type
+        ? { label: product.type.value, value: product.type.id }
+        : null,
+      tags: product.tags ? product.tags.map((t) => t.value) : null,
+    },
+    discountable: product.discountable,
   }
 }
 

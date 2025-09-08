@@ -3,7 +3,6 @@ import React from "react"
 import Badge from "../../../../../components/fundamentals/badge"
 import FeatureToggle from "../../../../../components/fundamentals/feature-toggle"
 import ChannelsIcon from "../../../../../components/fundamentals/icons/channels-icon"
-import EditIcon from "../../../../../components/fundamentals/icons/edit-icon"
 import TrashIcon from "../../../../../components/fundamentals/icons/trash-icon"
 import { ActionType } from "../../../../../components/molecules/actionables"
 import SalesChannelsDisplay from "../../../../../components/molecules/sales-channels-display"
@@ -14,7 +13,6 @@ import useToggleState from "../../../../../hooks/use-toggle-state"
 import useEditProductActions from "../../hooks/use-edit-product-actions"
 import EditableProductForm from "../../components/editable-product-form"
 import ChannelsModal from "./channels-modal"
-import GeneralModal from "./general-modal"
 
 type Props = {
   product: Product
@@ -22,11 +20,6 @@ type Props = {
 
 const GeneralSection = ({ product }: Props) => {
   const { onDelete, onStatusChange } = useEditProductActions(product.id)
-  const {
-    state: infoState,
-    close: closeInfo,
-    toggle: toggleInfo,
-  } = useToggleState()
   const {
     state: channelsState,
     close: closeChannels,
@@ -36,11 +29,6 @@ const GeneralSection = ({ product }: Props) => {
   const { isFeatureEnabled } = useFeatureFlag()
 
   const actions: ActionType[] = [
-    {
-      label: "Edit General Information",
-      onClick: toggleInfo,
-      icon: <EditIcon size={20} />,
-    },
     ...(isFeatureEnabled("sales_channels") ? [{
       label: "Edit Sales Channels",
       onClick: toggleChannels,
@@ -74,12 +62,11 @@ const GeneralSection = ({ product }: Props) => {
         </div>
         <div className="mt-6">
           <ProductTags product={product} />
-          <ProductDetails product={product} />
-          <ProductSalesChannels product={product} />
+          {/* <ProductDetails product={product} /> */}
+          {/* <ProductSalesChannels product={product} /> */}
         </div>
       </Section>
 
-      <GeneralModal product={product} open={infoState} onClose={closeInfo} />
       <FeatureToggle featureFlag="sales_channels">
         <ChannelsModal
           product={product}

@@ -9,7 +9,6 @@ import { type ImageData, type ImageMetadata } from "../../../../../utils/image-m
 
 interface Metadata {
   color: string
-  in_stock: boolean | string
   leadtime: string
   material: string
   description: string
@@ -31,7 +30,6 @@ interface Metadata {
 // Define field configurations for better rendering
 const fieldConfig = {
   color: { type: 'text', label: 'Color', section: 'basic' },
-  in_stock: { type: 'boolean', label: 'In Stock', section: 'basic' },
   leadtime: { type: 'text', label: 'Lead Time', section: 'basic' },
   material: { type: 'text', label: 'Material', section: 'basic' },
   description: { type: 'key-value', label: 'Description', section: 'content' },
