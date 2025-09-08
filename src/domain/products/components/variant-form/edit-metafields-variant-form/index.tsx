@@ -14,6 +14,8 @@ interface Metadata {
   material: string
   description: string
   product_information: string
+  description_1: string
+  description_2: string
   heading_1: string
   heading_2: string
   dimension_image: ImageMetadata
@@ -35,7 +37,9 @@ const fieldConfig = {
   description: { type: 'key-value', label: 'Description', section: 'content' },
   product_information: { type: 'key-value', label: 'Product Information', section: 'content' },
   heading_1: { type: 'richtext', label: 'Heading 1', section: 'content' },
+  description_1: { type: 'richtext', label: 'Description 1', section: 'content' },
   heading_2: { type: 'richtext', label: 'Heading 2', section: 'content' },
+  description_2: { type: 'richtext', label: 'Description 2', section: 'content' },
   dimension_image: { type: 'image', label: 'Dimension Image', section: 'images' },
   description_image_1: { type: 'image', label: 'Description Image 1', section: 'images' },
   description_image_2: { type: 'image', label: 'Description Image 2', section: 'images' },
@@ -62,6 +66,10 @@ const EditIMetadataVariantForm = ({ form }: Props) => {
 
     switch (config.type) {
       case 'richtext':
+        // Use inheritance message for description fields in variant form
+        const shouldShowInheritanceMessage = fieldId === 'description_1' || fieldId === 'description_2'
+        const inheritanceMessage = shouldShowInheritanceMessage ? "If empty, will inherit content from product metadata" : undefined
+        
         return (
           <RichTextField
             key={fieldId}
@@ -71,6 +79,7 @@ const EditIMetadataVariantForm = ({ form }: Props) => {
             onChange={(value) => setValue(`metadata.${fieldId}` as any, value, { shouldDirty: true })}
             placeholder={`Enter ${config.label.toLowerCase()}...`}
             errors={errors}
+            inheritanceMessage={inheritanceMessage}
           />
         )
       

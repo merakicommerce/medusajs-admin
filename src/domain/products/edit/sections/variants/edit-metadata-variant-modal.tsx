@@ -22,7 +22,7 @@ export const createUpdatePayload = (
 ): AdminPostProductsProductVariantsVariantReq => {
   const { metadata } = data
   return {
-    metadata,
+    metadata: metadata as Record<string, unknown>,
   }
 }
 const EditIMetadataVariantModal = ({ onClose, product, variant }: Props) => {
@@ -107,12 +107,18 @@ export const getEditIMetadataVariantDefaultValues = (
     material,
     description,
     product_information,
+    description_1,
+    description_2,
     dimension_image,
     heading_1,
     heading_2,
     description_image_1,
     description_image_2,
     images,
+    handle,
+    meta_title,
+    meta_keyword,
+    meta_description,
   } = variant.metadata as {
     color: string
     in_stock: boolean | string
@@ -120,27 +126,39 @@ export const getEditIMetadataVariantDefaultValues = (
     material: string
     description: string
     product_information: string
+    description_1: string
+    description_2: string
     heading_1: string
     heading_2: string
     dimension_image: string
     description_image_1: string
     description_image_2: string
     images: string[] | string
+    handle: string
+    meta_title: string
+    meta_keyword: string
+    meta_description: string
   }
   return {
     metadata: {
-      color,
+      color: color || '',
       in_stock: in_stock || false,
-      leadtime,
-      material,
-      description,
-      product_information,
-      heading_1,
-      dimension_image,
-      heading_2,
-      description_image_1,
-      description_image_2,
+      leadtime: leadtime || '',
+      material: material || '',
+      description: description || '',
+      product_information: product_information || '',
+      description_1: description_1 || '',
+      description_2: description_2 || '',
+      heading_1: heading_1 || '',
+      dimension_image: dimension_image || '',
+      heading_2: heading_2 || '',
+      description_image_1: description_image_1 || '',
+      description_image_2: description_image_2 || '',
       images: images || [],
+      handle: handle || '',
+      meta_title: meta_title || '',
+      meta_keyword: meta_keyword || '',
+      meta_description: meta_description || '',
     },
   }
 }

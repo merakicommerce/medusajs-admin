@@ -13,6 +13,7 @@ type RichTextFieldProps = {
   required?: boolean
   errors?: { [x: string]: unknown }
   className?: string
+  inheritanceMessage?: string
 }
 
 const RichTextField: React.FC<RichTextFieldProps> = ({
@@ -24,7 +25,8 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
   placeholder = '',
   required = false,
   errors,
-  className
+  className,
+  inheritanceMessage
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [textValue, setTextValue] = useState('')
@@ -132,7 +134,7 @@ const RichTextField: React.FC<RichTextFieldProps> = ({
       <div className="flex justify-between items-center mt-1">
         <InputError name={name} errors={errors} />
         <p className="text-xs text-grey-50">
-          Press Enter for new lines.
+          {inheritanceMessage || "Press Enter for new lines."}
         </p>
       </div>
     </div>
