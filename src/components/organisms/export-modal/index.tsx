@@ -22,16 +22,28 @@ const ExportModal: React.FC<ExportModalProps> = ({
           <span className="inter-xlarge-semibold">{title}</span>
         </Modal.Header>
         <Modal.Content>
-          {/* TODO: Add filtering
-          <div className="flex inter-small-semibold mb-2">Current filters</div>
-          <div className="flex mb-4 inter-small-regular text-grey-50">
-            You havn’t applied any filtering. Remember that the export list
-            feature in many ways are controlled by how you filter the list
-            overview.
-          </div> */}
-          <div className="flex mb-4 inter-small-regular text-grey-50">
-            Initialize an export of your data
-          </div>
+          {loading ? (
+            <div className="flex flex-col">
+              <div className="flex mb-4 inter-small-regular text-grey-90">
+                <strong>Export in progress...</strong>
+              </div>
+              <div className="flex mb-4 inter-small-regular text-grey-50">
+                Your export is being processed. This may take up to 1 minute depending on the number of products. The file will download automatically when ready.
+              </div>
+              <div className="flex mb-4 inter-small-regular text-grey-50">
+                You can continue working in other tabs while the export completes.
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col">
+              <div className="flex mb-4 inter-small-regular text-grey-50">
+                Export all your products to a CSV file. This process may take up to 1 minute.
+              </div>
+              <div className="flex mb-4 inter-small-regular text-grey-50">
+                The file will include product details, variants, pricing, and inventory information.
+              </div>
+            </div>
+          )}
         </Modal.Content>
         <Modal.Footer>
           <div className="w-full flex justify-end">
@@ -40,6 +52,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
               size="small"
               onClick={handleClose}
               className="mr-2"
+              disabled={loading}
             >
               Cancel
             </Button>
@@ -50,7 +63,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
               size="small"
               onClick={onSubmit}
             >
-              Export
+              {loading ? "Exporting..." : "Export"}
             </Button>
           </div>
         </Modal.Footer>

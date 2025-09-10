@@ -109,6 +109,8 @@ const Overview = () => {
     state: exportModalOpen,
   } = useToggleState(false)
 
+  const [isExporting, setIsExporting] = useState(false)
+
   const {
     open: openImportModal,
     close: closeImportModal,
@@ -140,7 +142,8 @@ const Overview = () => {
 
   const handleCreateExport = async () => {
     try {
-      notification("Loading", "Preparing export...", "info")
+      setIsExporting(true)
+      notification("Info", "Export started - this may take up to 1 minute. The file will download automatically when ready.", "info")
       
       // Use medusaRequest for proper authentication
       const response = await medusaRequest(
@@ -222,13 +225,14 @@ const Overview = () => {
       // Cleanup
       window.URL.revokeObjectURL(downloadUrl);
       
-      notification("Success", "Products exported successfully", "success")
+      notification("Success", "Products exported successfully! The file has been downloaded.", "success")
     } catch (error) {
       console.error("Export failed:", error)
       notification("Error", "Export failed. Please try again.", "error")
+    } finally {
+      setIsExporting(false)
+      closeExportModal()
     }
-
-    closeExportModal()
   }
 
 
@@ -261,9 +265,9 @@ const Overview = () => {
       {exportModalOpen && (
         <ExportModal
           title="Export Products"
-          handleClose={() => closeExportModal()}
+          handleClose={() => !isExporting && closeExportModal()}
           onSubmit={handleCreateExport}
-          loading={false}
+          loading={isExporting}
         />
       )}
       {importModalOpen && (
