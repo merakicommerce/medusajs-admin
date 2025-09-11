@@ -145,13 +145,27 @@ const Overview = () => {
       setIsExporting(true)
       notification("Info", "Export started - this may take up to 1 minute. The file will download automatically when ready.", "info")
       
-      // Use medusaRequest for proper authentication
+      // Use a simpler API request to avoid URL length issues and 500 errors
+      console.log('Starting products export...')
+      
       const response = await medusaRequest(
         "GET", 
-        "/admin/products?fields=id,title,handle,status,description,collection_id&expand=variants,options,variants.prices,variants.options,collection,tags,type,images,sales_channels&is_giftcard=false&limit=1000"
+        "/admin/products?expand=variants,collection,tags,type&is_giftcard=false&limit=1000"
       )
       
+      console.log('API Response received:', response.status)
+      
+      if (!response.data || !response.data.products) {
+        console.error('Invalid response structure:', response.data)
+        throw new Error('Invalid response from products API')
+      }
+      
       const data = response.data
+      console.log(`Found ${data.products.length} products`)
+      
+      // For now, just use the products as they came from the API
+      // If metadata is not available, the fields will be empty in the CSV
+      const productsWithMetadata = data.products
       
       // Convert JSON to CSV
       function jsonToCsv(json) {
@@ -175,20 +189,54 @@ const Overview = () => {
         return csv.join('\r\n');
       }
       
+      // Utility function to strip HTML tags and clean up text
+      const stripHtmlTags = (html) => {
+        if (!html || typeof html !== 'string') return '';
+        
+        // First, remove all HTML comments (including CSS style blocks)
+        let cleanHtml = html.replace(/<!--[\s\S]*?-->/g, '');
+        
+        // Create a temporary DOM element to parse HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cleanHtml;
+        
+        // Extract text content and clean up whitespace
+        let text = tempDiv.textContent || tempDiv.innerText || '';
+        
+        // Replace multiple whitespace characters with single spaces
+        text = text.replace(/\s+/g, ' ');
+        
+        // Trim leading and trailing whitespace
+        text = text.trim();
+        
+        return text;
+      };
+
       // Process the products data for CSV export
-      const csvData = data.products.map(product => {
+      const csvData = productsWithMetadata.map(product => {
+        // Get the first variant's metadata for heading_1 and heading_2
+        // Note: variants.metadata might not be expanded, so we'll handle gracefully
+        const firstVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+        const variantMetadata = firstVariant?.metadata || {};
+        
+        // Get product metadata for description_1 and description_2
+        const productMetadata = product.metadata || {};
+        
         return {
           "ID": product.id,
           "Title": product.title,
           "Handle": product.handle,
           "Status": product.status,
           "Description": product.description || '',
+          "heading_1": variantMetadata.heading_1 || '',
+          "description_1": stripHtmlTags(productMetadata.description_1) || '',
+          "heading_2": variantMetadata.heading_2 || '',
+          "description_2": stripHtmlTags(productMetadata.description_2) || '',
           "Collection": product.collection?.title || '',
           "Type": product.type?.value || '',
           "Tags": product.tags?.map(tag => tag.value).join('; ') || '',
           "Thumbnail": product.thumbnail || '',
           "Variant Count": product.variants?.length || 0,
-          "Option Count": product.options?.length || 0,
           "Created At": product.created_at ? new Date(product.created_at).toLocaleString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -226,9 +274,18 @@ const Overview = () => {
       window.URL.revokeObjectURL(downloadUrl);
       
       notification("Success", "Products exported successfully! The file has been downloaded.", "success")
-    } catch (error) {
+    } catch (error: any) {
       console.error("Export failed:", error)
-      notification("Error", "Export failed. Please try again.", "error")
+      
+      // Provide more specific error messages
+      let errorMessage = "Export failed. Please try again."
+      if (error.response) {
+        errorMessage = `Export failed with status ${error.response.status}: ${error.response.statusText}`
+      } else if (error.message) {
+        errorMessage = `Export failed: ${error.message}`
+      }
+      
+      notification("Error", errorMessage, "error")
     } finally {
       setIsExporting(false)
       closeExportModal()

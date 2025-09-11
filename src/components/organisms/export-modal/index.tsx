@@ -40,7 +40,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                 Export all your products to a CSV file. This process may take up to 1 minute.
               </div>
               <div className="flex mb-4 inter-small-regular text-grey-50">
-                The file will include product details, variants, pricing, and inventory information.
+                The file will include product details, variants, pricing, inventory information, and metadata fields (heading_1, description_1, heading_2, description_2).
               </div>
             </div>
           )}
