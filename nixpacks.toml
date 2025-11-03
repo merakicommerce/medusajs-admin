@@ -1,0 +1,8 @@
+[build]
+# Install Node.js dependencies
+cmds = ["yarn install --frozen-lockfile", "yarn build"]
+
+[start]
+# Run the preview server on port 7000
+cmd = "yarn preview --host 0.0.0.0"
+run_image = "node:18-alpine"

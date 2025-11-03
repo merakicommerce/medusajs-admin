@@ -23,6 +23,54 @@ export default defineConfig(({ command, mode }) => {
     publicDir: "static",
     build: {
       outDir: "public",
+      chunkSizeWarningLimit: 1000,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // Vendor chunks for better caching
+            'radix': [
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-avatar',
+              '@radix-ui/react-collapsible',
+              '@radix-ui/react-dialog',
+              '@radix-ui/react-dropdown-menu',
+              '@radix-ui/react-popover',
+              '@radix-ui/react-portal',
+              '@radix-ui/react-radio-group',
+              '@radix-ui/react-select',
+              '@radix-ui/react-switch',
+              '@radix-ui/react-tooltip',
+            ],
+            'react-vendors': [
+              'react',
+              'react-dom',
+              'react-router-dom',
+            ],
+            'query': [
+              '@tanstack/react-query',
+              'axios',
+            ],
+            'medusa': [
+              '@medusajs/medusa',
+              'medusa-react',
+            ],
+            'forms': [
+              'react-hook-form',
+              '@hookform/error-message',
+              'react-select',
+            ],
+            'table': [
+              'react-table',
+            ],
+            'utils': [
+              'lodash',
+              'moment',
+              'clsx',
+              'uuid',
+            ],
+          }
+        }
+      }
     },
 
     resolve: {
