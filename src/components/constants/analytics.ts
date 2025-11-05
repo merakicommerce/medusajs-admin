@@ -1,1 +1,2 @@
-export const WRITE_KEY = "CgSOOuDMovQRSSTytDLqbhVs9xP0wb4U"
+// Segment Analytics - Set to empty string to disable
+export const WRITE_KEY = ""
