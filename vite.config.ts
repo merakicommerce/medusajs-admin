@@ -7,6 +7,15 @@ import { defineConfig, loadEnv } from "vite"
 // @see https://vitejs.dev/config/server-options.html#server-host.
 dns.setDefaultResultOrder("verbatim")
 
+const removeNodeModulesPlugin = {
+  name: 'remove-node-modules',
+  resolveId(id: string) {
+    if (id === 'typeorm' || id === 'medusa-interfaces') {
+      return { id: 'virtual-empty', external: true }
+    }
+  },
+}
+
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const MEDUSA_BACKEND_URL = JSON.stringify(
@@ -18,13 +27,14 @@ export default defineConfig(({ command, mode }) => {
   )
   console.log("MEDUSA_BACKEND_URL", MEDUSA_BACKEND_URL)
   return {
-    plugins: [react()],
+    plugins: [react(), removeNodeModulesPlugin],
     // Backwards-compat with Gatsby.
     publicDir: "static",
     build: {
       outDir: "public",
       chunkSizeWarningLimit: 1000,
       rollupOptions: {
+        external: ["typeorm", "medusa-interfaces"],
         output: {
           manualChunks: {
             // Vendor chunks for better caching
@@ -86,7 +96,7 @@ export default defineConfig(({ command, mode }) => {
       __MEDUSA_BACKEND_URL__: MEDUSA_BACKEND_URL
     },
     optimizeDeps: {
-      exclude: ["typeorm", "medusa-interfaces"],
+      exclude: ["typeorm", "medusa-interfaces", "@medusajs/medusa"],
     },
     server: {
       host: true,

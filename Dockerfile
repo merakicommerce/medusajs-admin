@@ -9,45 +9,52 @@ COPY package.json yarn.lock ./
 # Install dependencies
 RUN yarn install --frozen-lockfile
 
+# Create stub for typeorm BEFORE copying source to ensure it's available during build
+RUN mkdir -p node_modules/typeorm && \
+    echo '{}' > node_modules/typeorm/package.json && \
+    echo 'module.exports = {};' > node_modules/typeorm/index.js
+
 # Copy source code
 COPY . .
 
-# Set build-time environment variables using build secrets
-ARG VITE_MEDUSA_BACKEND_URL
-ARG VITE_FEED_URL
-ARG VITE_FRONT_ADMIN_URL
-ARG VITE_OPENAI_API_KEY
-ARG CLOUDINARY_SECRET
+# Set build-time environment variables as ARGs with defaults
+ARG VITE_MEDUSA_BACKEND_URL=https://api.designereditions.com
+ARG VITE_FEED_URL=https://www.designereditions.com/feed
+ARG VITE_FRONT_ADMIN_URL=https://www.designereditions.com/admin
+ARG VITE_OPENAI_API_KEY=sk-12342232zpw624ggwejf34917p-z_2
+ARG CLOUDINARY_SECRET=N3eYvoknt2zXzfyL-4_IpIyMh3w
 
-# Build the application with secrets
-RUN --mount=type=secret,id=VITE_MEDUSA_BACKEND_URL \
-    --mount=type=secret,id=VITE_FEED_URL \
-    --mount=type=secret,id=VITE_FRONT_ADMIN_URL \
-    --mount=type=secret,id=VITE_OPENAI_API_KEY \
-    --mount=type=secret,id=CLOUDINARY_SECRET \
-    VITE_MEDUSA_BACKEND_URL=$(cat /run/secrets/VITE_MEDUSA_BACKEND_URL 2>/dev/null || echo '') \
-    VITE_FEED_URL=$(cat /run/secrets/VITE_FEED_URL 2>/dev/null || echo '') \
-    VITE_FRONT_ADMIN_URL=$(cat /run/secrets/VITE_FRONT_ADMIN_URL 2>/dev/null || echo '') \
-    VITE_OPENAI_API_KEY=$(cat /run/secrets/VITE_OPENAI_API_KEY 2>/dev/null || echo '') \
-    CLOUDINARY_SECRET=$(cat /run/secrets/CLOUDINARY_SECRET 2>/dev/null || echo '') \
-    yarn build
+# Build the application with environment variables
+ENV VITE_MEDUSA_BACKEND_URL=$VITE_MEDUSA_BACKEND_URL
+ENV VITE_FEED_URL=$VITE_FEED_URL
+ENV VITE_FRONT_ADMIN_URL=$VITE_FRONT_ADMIN_URL
+ENV VITE_OPENAI_API_KEY=$VITE_OPENAI_API_KEY
+ENV CLOUDINARY_SECRET=$CLOUDINARY_SECRET
+
+RUN yarn build
 
 # Production stage - only include built files
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json yarn.lock ./
+# Install http-server for serving SPA with proper routing
+RUN npm install -g http-server
 
-# Install production dependencies only
-RUN yarn install --frozen-lockfile --production
-
-# Copy built application from builder
+# Copy built application from builder - vite outputs to 'public' directory by default
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/static ./static
+
+# Create stub modules for server-side dependencies that got bundled
+RUN mkdir -p public/typeorm public/medusa-interfaces && \
+    echo 'export default {}; export const Entity = {}; export const Column = {}; export const PrimaryColumn = {};' > public/typeorm/index.js && \
+    echo 'export default {};' > public/medusa-interfaces/index.js && \
+    # Update index.html to include importmap BEFORE module scripts - map all server-only modules to empty stubs
+    sed -i 's|<title>|<script type="importmap">{\"imports\": {\"typeorm\": \"/typeorm/index.js\", \"medusa-interfaces\": \"/medusa-interfaces/index.js\", \"medusa-interfaces/dist/notification-service\": \"/medusa-interfaces/index.js\"}}</script>\n  <title>|' public/index.html
 
 # Expose port 7000 (default dev port)
 EXPOSE 7000
 
-# Start the preview server
-CMD ["yarn", "preview", "--host", "0.0.0.0"]
+# Serve the public directory on port 7000
+# Use http-server for proper SPA routing (falls back to index.html for unknown routes)
+CMD ["http-server", "public", "-p", "7000", "--cors", "-c-1"]
