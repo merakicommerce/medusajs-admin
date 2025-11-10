@@ -64,9 +64,13 @@ const Summary = () => {
     name: "custom_shipping_price",
   })
 
+  const isShouldCallDiscount = !!discountCode
+
   const { discount, status } = useAdminGetDiscountByCode(discountCode!, {
-    enabled: !!discountCode,
+    enabled: isShouldCallDiscount,
   })
+
+  const queryStatus = isShouldCallDiscount ? status : undefined
 
   const { shipping_options } = useAdminShippingOptions(
     { region_id: region?.value },
@@ -107,13 +111,13 @@ const Summary = () => {
   }, [discount])
 
   useEffect(() => {
-    if (status === "error") {
+    if (queryStatus === "error") {
       setDiscError("The discount code is invalid")
       setCode(undefined)
       form.setValue("discount_code", undefined)
       setShowAddDiscount(true)
     }
-  }, [status])
+  }, [queryStatus])
 
   const onDiscountRemove = () => {
     form.setValue("discount_code", undefined)
@@ -222,7 +226,7 @@ const Summary = () => {
                 className="border h-full border-grey-20"
                 variant="ghost"
                 size="small"
-                loading={status === "loading"}
+                loading={queryStatus === "loading"}
                 onClick={() => handleAddDiscount()}
               >
                 <PlusIcon size={20} />
