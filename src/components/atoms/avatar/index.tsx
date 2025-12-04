@@ -7,8 +7,8 @@ type AvatarProps = {
     img?: string
     first_name?: string
     last_name?: string
-    email: string
-  }
+    email?: string
+  } | null
   font?: string
   color?: string
 }
@@ -25,7 +25,7 @@ const Avatar: React.FC<AvatarProps> = ({
   } else if (user?.email) {
     username = user.email
   } else {
-    username = "Medusa user"
+    username = "-"
   }
 
   return (
